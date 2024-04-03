@@ -1,6 +1,58 @@
+[tool.poetry]
+name = "ds-mapaction-ecmwf"
+version = "0.1.0"
+description = "historical analysis of ECMWF seasonal forecasts"
+homepage = "https://github.com/OCHA-DAP/ds-mapaction-ecmwf"
+repository = "https://github.com/OCHA-DAP/ds-mapaction-ecmwf"
+authors = [
+    "Tristan Downing <downing.tristan@gmail.com>",
+    "Evangelos Diakatos <ediakatos@mapaction.org>",
+    "Carola Martens <cmartens@mapaction.org>",
+    "Jiri Klic <jklic@mapaction.org>"
+]
+license = "GPL-3.0-only"
+readme = "README.md"
+keywords = ["ECMWF", "MapAction", "forecast"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+cdsapi = "^0.6.1"
+
+
+[tool.poetry.group.dev.dependencies]
+jupyterlab = "^4.1.5"
+pre-commit = "^3.7.0"
+black = "^24.3.0"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+pymarkdownlnt = "^0.9.18"
+
+
 [tool.black]
 line-length = 79
+
 
 [tool.isort]
 profile = "black"
 line_length = 79
+
+
+[tool.pymarkdown]
+plugins.line-length.enabled = false
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
