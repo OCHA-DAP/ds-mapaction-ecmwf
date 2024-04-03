@@ -4,7 +4,7 @@
 |---|---|
 |Project|[![Python Versions](https://img.shields.io/badge/Python-3.8%20%7C%203.9%20%7C%203.10-blue?logo=python&logoColor=white)](https://www.python.org/) [![License](https://img.shields.io/github/license/OCHA-DAP/ds-mapaction-ecmwf)](LICENSE) [![GitHub top language](https://img.shields.io/github/languages/top/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf)|
 |Quality| [![Issues](https://img.shields.io/github/issues/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/issues) |
-| Tools | [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit) [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/) [![Jupyter](https://img.shields.io/badge/Jupyter-gray?logo=jupyter&labelColor=grey&color=orange&logoColor=orange)](https://jupyter.org/) |
+| Tools | [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/) [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/) [![Jupyter](https://img.shields.io/badge/Jupyter-gray?logo=jupyter&labelColor=grey&color=orange&logoColor=orange)](https://jupyter.org/) |
 |Community|[![Maintenance](https://img.shields.io/badge/Maintained-yes-green)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/graphs/commit-activity) [![Stars](https://img.shields.io/github/stars/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf)  [![Forks](https://img.shields.io/github/forks/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/network/members)  [![Contributors](https://img.shields.io/github/contributors/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/graphs/contributors)  [![Commit activity](https://img.shields.io/github/commit-activity/m/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/commits/main)|
 |Maintainers|[![UN-OCHA](https://img.shields.io/badge/-UN%20OCHA-black?logo=linkedin&colorB=gray)](https://www.linkedin.com/company/united-nations-ocha/) [![MapAction](https://img.shields.io/badge/-MapAction-black?logo=linkedin&colorB=gray)](https://www.linkedin.com/company/mapaction/)|
 
@@ -64,7 +64,7 @@ and run
 make .venv hooks
 ```
 
-or if do not have `make` on your OS (i.e. Windows), you can run
+or if you do not have `make` on your OS (i.e. Windows), you can run
 
 ```bash
 # first install all dependencies
@@ -91,7 +91,7 @@ You can also run lint tests manually using
 make lint
 ```
 
-or if do not have `make` on your OS (i.e. Windows), you can run
+or if you do not have `make` on your OS (i.e. Windows), you can run
 
 ```bash
 poetry run pre-commit run --all-files
