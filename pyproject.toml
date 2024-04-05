@@ -51,6 +51,7 @@ line_length = 79
 
 [tool.pymarkdown]
 plugins.line-length.enabled = false
+plugins.header-increment.enabled = false
 
 
 [build-system]
