@@ -12,7 +12,14 @@ authors = [
 ]
 license = "GPL-3.0-only"
 readme = "README.md"
-keywords = ["ECMWF", "MapAction", "forecast"]
+keywords = [
+    "UN-OCHA",
+    "MapAction",
+    "Copernicus",
+    "ECMWF",
+    "climate",
+    "forecast"
+]
 classifiers = [
     "Development Status :: 1 - Planning",
     "Intended Audience :: Developers",
