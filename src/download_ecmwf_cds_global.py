@@ -3,8 +3,8 @@
 import os
 from typing import List
 
-from cds.ecmwf import download_ecmwf_cds
-from util import setup_output_path
+from data_retrieval.cds.ecmwf import download_ecmwf_cds
+from data_retrieval.util import setup_output_path
 
 OUTPUT_PATH: str = "~/Downloads/ECMWF_Global_Forecast"
 

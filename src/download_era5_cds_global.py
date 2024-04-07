@@ -1,8 +1,8 @@
 import os
 from typing import List
 
-from cds.era5 import download_era5_cds
-from util import setup_output_path
+from data_retrieval.cds.era5 import download_era5_cds
+from data_retrieval.util import setup_output_path
 
 OUTPUT_PATH: str = "~/Downloads/ERA5_Global_Data"
 

@@ -30,14 +30,14 @@ cd ds-mapaction-ecmwf/
 and run
 
 ```bash
-poetry run python src/data_retrieval/ecmwf_forecast_global_cds.py
+poetry run python src/download_ecmwf_cds_global.py
 ```
 
 Your request will be placed in a queue, and the process will wait for your turn.  
 You should see something like this:
 
 ```bash
-$ poetry run python src/data_retrieval/ecmwf_forecast_global_cds.py
+$ poetry run python src/download_ecmwf_cds_global.py
 2024-04-04 20:42:00,523 INFO Welcome to the CDS
 2024-04-04 20:42:00,523 INFO Sending request to https://cds.climate.copernicus.eu/api/v2/resources/seasonal-monthly-single-levels
 2024-04-04 20:42:00,632 INFO Request is queued
@@ -47,7 +47,7 @@ $ poetry run python src/data_retrieval/ecmwf_forecast_global_cds.py
 This can take a few minutes. Eventually a progress bar will appear once the download starts. You should see something like this once the download is complete:
 
 ```bash
-$ poetry run python src/data_retrieval/ecmwf_forecast_global_cds.py
+$ poetry run python src/download_ecmwf_cds_global.py
 2024-04-04 20:42:00,523 INFO Welcome to the CDS
 2024-04-04 20:42:00,523 INFO Sending request to https://cds.climate.copernicus.eu/api/v2/resources/seasonal-monthly-single-levels
 2024-04-04 20:42:00,632 INFO Request is queued
@@ -69,14 +69,14 @@ cd ds-mapaction-ecmwf/
 and run
 
 ```bash
-poetry run python src/data_retrieval/era5_forecast_global_cds.py
+poetry run python src/download_era5_cds_global.py
 ```
 
 Your request will be placed in a queue, and the process will wait for your turn.  
 You should see something like this:
 
 ```bash
-$ poetry run python src/data_retrieval/era5_forecast_global_cds.py
+$ poetry run python src/download_era5_cds_global.py
 2024-04-04 20:23:51,375 INFO Welcome to the CDS
 2024-04-04 20:23:51,376 INFO Sending request to https://cds.climate.copernicus.eu/api/v2/resources/reanalysis-era5-single-levels-monthly-means
 2024-04-04 20:23:51,479 INFO Request is queued
@@ -86,7 +86,7 @@ $ poetry run python src/data_retrieval/era5_forecast_global_cds.py
 This can take a few minutes. Eventually a progress bar will appear once the download starts. You should see something like this once the download is complete:
 
 ```bash
-$ poetry run python src/data_retrieval/era5_forecast_global_cds.py
+$ poetry run python src/download_era5_cds_global.py
 2024-04-04 20:23:51,375 INFO Welcome to the CDS
 2024-04-04 20:23:51,376 INFO Sending request to https://cds.climate.copernicus.eu/api/v2/resources/reanalysis-era5-single-levels-monthly-means
 2024-04-04 20:23:51,479 INFO Request is queued

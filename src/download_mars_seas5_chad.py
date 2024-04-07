@@ -1,8 +1,8 @@
 import os
 from typing import List
 
-from cds.mars import download_ecmwf_mars
-from util import setup_output_path
+from data_retrieval.cds.mars import download_ecmwf_mars
+from data_retrieval.util import setup_output_path
 
 OUTPUT_PATH: str = "~/Downloads/MARS_Chad_Forecast"
 

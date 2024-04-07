@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict, Optional
 
-from cds.common import download_mars, get_dates
+from data_retrieval.cds.common import download_mars, get_dates
 
 DEFAULT_GRID: str = "0.4/0.4"
 DEFAULT_FCMONTH: str = "1/2/3/4/5/6/7"
