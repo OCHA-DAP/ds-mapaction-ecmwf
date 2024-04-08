@@ -22,6 +22,3 @@ repos:
       entry: poetry run pymarkdown scan
       language: system
       types: [file, markdown]
-      # args:
-      #   - scan
-      #   - .

@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict, List
 
-from cds.common import download_cds
+from data_retrieval.cds.common import download_cds
 
 
 def get_era5_cds_metadata(
