@@ -4,7 +4,10 @@ on:
   push:
     branches: main
   pull_request:
-    types: [opened, edited, reopened]
+    types: [opened, edited, synchronize, reopened]
+
+env:
+  POETRY_VERSION: 1.8.2
 
 jobs:
   checks:
@@ -20,9 +23,10 @@ jobs:
         uses: actions/setup-python@v5.1.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Check Python
-        run: python -c "import sys; print(sys.version)"
-      - name: Check Poetry
+      - name: Install Poetry
         run: |
-          poetry --help
+          curl -sSL https://install.python-poetry.org | python3 -
           poetry --version
+      - name: Install dependencies
+        run: |
+          make .venv
