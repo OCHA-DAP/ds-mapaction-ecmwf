@@ -1,0 +1,28 @@
+name: ci-test
+
+on:
+  push:
+    branches: main
+  pull_request:
+    types: [opened, edited, reopened]
+
+jobs:
+  checks:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        python-version: ["3.10"]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Check Python
+        run: python -c "import sys; print(sys.version)"
+      - name: Check Poetry
+        run: |
+          poetry --help
+          poetry --version
