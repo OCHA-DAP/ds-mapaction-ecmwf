@@ -30,3 +30,9 @@ jobs:
       - name: Install dependencies
         run: |
           make .venv
+      - name: Lint code
+        run: |
+          make lint
+      - name: Test code
+        run: |
+          make test
