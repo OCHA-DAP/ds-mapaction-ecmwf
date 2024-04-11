@@ -1,0 +1,38 @@
+name: ci-test
+
+on:
+  push:
+    branches: main
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+env:
+  POETRY_VERSION: 1.8.2
+
+jobs:
+  checks:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
+      - name: Install dependencies
+        run: |
+          make .venv
+      - name: Lint code
+        run: |
+          make lint
+      - name: Test code
+        run: |
+          make test
