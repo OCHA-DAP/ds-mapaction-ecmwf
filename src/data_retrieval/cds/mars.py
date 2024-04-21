@@ -1,6 +1,8 @@
 import os
 from typing import Any, Dict, Optional
 
+import pandas as pd
+
 from .common import download_mars, get_dates
 
 DEFAULT_GRID: str = "0.4/0.4"
@@ -17,6 +19,20 @@ def get_ensemble_numbers(year: int) -> str:
         ENSEMBLE_MEMBERS_25 if year <= 2016 else ENSEMBLE_MEMBERS_51
     )
     return number_use
+
+
+def get_country_bbox_df() -> pd.DataFrame:
+    data_path: str = os.path.normpath(
+        os.path.join(
+            os.path.realpath(__file__),
+            "..",
+            "..",
+            "static_data",
+            "country_bbox.csv",
+        )
+    )
+    df = pd.read_csv(data_path)
+    return df
 
 
 def get_ecmwf_mars_metadata(
