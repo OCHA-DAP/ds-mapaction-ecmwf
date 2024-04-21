@@ -1,7 +1,8 @@
 # ECMWF MARS
 
 * [Configure MARS API](#configure-mars-api)
-* [ECMWF MARS Chad](#ecmwf-mars-chad)
+* [Download ECMWF MARS data](#download-ecmwf-mars-data)
+* [Supported countries](#supported-countries)
 * [Reference material](#reference-material)
 * [Troubleshooting](#troubleshooting)
 
@@ -19,6 +20,26 @@ $ cat ~/.ecmwfapirc
     "key"   : "123456789abcdefg123456789abcdefg",
     "email" : "your.name@company.com"
 }
+```
+
+### Download ECMWF MARS data
+
+To retrieve ECMWF MARS data set, navigate to the root directory
+
+```bash
+cd ds-mapaction-ecmwf/
+```
+
+and run
+
+```bash
+poetry run python src/data_retrieval mars [country-iso]
+```
+
+for example to download the data for Ethiopia, run
+
+```bash
+poetry run python src/data_retrieval mars ETH
 ```
 
 ### Supported countries
@@ -241,21 +262,6 @@ $ cat ~/.ecmwfapirc
 | ZAF   | South Africa                                 |
 | ZMB   | Zambia                                       |
 | ZWE   | Zimbabwe                                     |
-
-### ECMWF MARS Chad
-
-To retrieve ECMWF MARS data set for Chad,  
-navigate to the root directory
-
-```bash
-cd ds-mapaction-ecmwf/
-```
-
-and run
-
-```bash
-poetry run python src/download_mars_seas5_chad.py
-```
 
 ### Reference material
 
