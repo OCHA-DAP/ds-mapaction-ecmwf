@@ -9,6 +9,7 @@ Welcome to `ds-mapaction-ecmwf` documentation.
   * [Troubleshooting](copernicus-cds.md#troubleshooting)
 * [ECMWF MARS](ecmwf-mars.md)
   * [Configure MARS API](ecmwf-mars.md#configure-mars-api)
-  * [ECMWF MARS Chad](ecmwf-mars.md#ecmwf-mars-chad)
+  * [Download ECMWF MARS data](ecmwf-mars.md#download-ecmwf-mars-data)
+  * [Supported countries](ecmwf-mars.md#supported-countries)
   * [Reference material](ecmwf-mars.md#reference-material)
   * [Troubleshooting](ecmwf-mars.md#troubleshooting)
