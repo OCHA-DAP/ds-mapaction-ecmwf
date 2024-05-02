@@ -1,3 +1,6 @@
+import os
+import tempfile
+from io import BytesIO
 from typing import Any, Dict
 
 import cdsapi
@@ -25,24 +28,33 @@ def get_dates(year: int) -> str:
     return dates
 
 
-def download_cds(name: str, metadata: Dict[str, Any], file_path: str):
+def download_cds(name: str, metadata: Dict[str, Any]) -> BytesIO:
     client = cdsapi.Client()
 
-    client.retrieve(
-        name,
-        metadata,
-        file_path,
-    )
+    # Use a temporary file to handle the download
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        client.retrieve(name, metadata, tmp.name)
+        tmp.seek(0)  # Rewind the file to read its content
+        data = BytesIO(tmp.read())
 
-    print(f"Downloaded: {file_path}")
+    os.unlink(tmp.name)
+    data.seek(0)
+
+    print(f"Downloaded: {data}")
+    return data
 
 
-def download_mars(metadata: Dict[str, Any], file_path: str):
+def download_mars(metadata: Dict[str, Any]) -> BytesIO:
     server = ECMWFService("mars")
 
-    server.execute(
-        metadata,
-        file_path,
-    )
+    # Use a temporary file to handle the download
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        server.execute(metadata, tmp.name)
+        tmp.seek(0)  # Rewind the file to read its content
+        data = BytesIO(tmp.read())
 
-    print(f"Downloaded: {file_path}")
+    os.unlink(tmp.name)  # Delete the temporary file
+    data.seek(0)  # Rewind the BytesIO object for further use
+
+    print("Downloaded data to memory")
+    return data

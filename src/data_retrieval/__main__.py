@@ -1,15 +1,17 @@
 import argparse
-import os
+from io import BytesIO
 from typing import List
 
 import pandas as pd
+from azure_blob_utils import load_env_vars, upload_stream
 from cds.ecmwf import download_ecmwf_cds
 from cds.era5 import download_era5_cds
 from cds.mars import download_ecmwf_mars, get_country_bbox_df
-from util import get_logger, setup_output_path
+from util import get_logger
+
+sas_token, container_name, storage_account = load_env_vars()
 
 logger = get_logger(__name__)
-
 
 parser = argparse.ArgumentParser(
     description="Download data from ECMWF MARS and Copernicus CDS"
@@ -30,13 +32,11 @@ parser_mars.add_argument(
 
 def get_cds_ecmwf():
     logger.info("Downloading Copernicus CDS data of ECMWF global forecast..")
-    file_name: str = "ecmwf_forecast_global_all_years.grib"
-    output_path: str = os.path.expanduser("~/Downloads/ecmwf_global_forecast")
-    setup_output_path(output_path)
+    blob_path = "/raw/glb/ecmwf/ecmwf-monthly-seasonalforecast-1981-2023.grib"
 
     # Utilizing the specific range of available years you've provided
     # Updated to include 1981 through 2023
-    available_years: List[int] = list(range(1981, 2024))
+    available_years: List[int] = list(range(1981, 2023))
 
     months: List[int] = list(range(1, 13))
 
@@ -45,8 +45,9 @@ def get_cds_ecmwf():
     leadtime_months: List[int] = list(range(1, 7))
 
     # Download all years, months, and leadtime months
-    download_ecmwf_cds(
-        available_years, months, leadtime_months, output_path, file_name
+    data_stream = download_ecmwf_cds(available_years, months, leadtime_months)
+    upload_stream(
+        sas_token, container_name, storage_account, data_stream, blob_path
     )
 
 
@@ -57,52 +58,87 @@ def get_cds_era5():
     file_name: str = (
         "era5_total_precipitation_global_1981_2023_all_months.grib"
     )
-    output_path: str = os.path.expanduser("~/Downloads/era5_global_data")
-    setup_output_path(output_path)
+    blob_path = "/raw/glb/era5/era5-total-precipitation-1981-2023.grib"
 
     # Define the years and months for the single request
-    # From 1981 to 2023 try extra 2024 next time
     years: List[int] = list(range(1981, 2024))
-
-    # All months
     months: List[int] = list(range(1, 13))
 
     # Download the data for the entire globe with a single request
-    download_era5_cds(years, months, output_path, file_name)
+    data_stream = download_era5_cds(years, months, file_name)
+
+    # Define the blob path for upload
+
+    # Upload the data to the cloud
+    upload_stream(
+        sas_token, container_name, storage_account, data_stream, blob_path
+    )
+
+
+def upload_to_cloud(
+    data_streams,
+    sas_token,
+    container_name,
+    storage_account,
+    country_name,
+    years,
+):
+    for year, data_stream in zip(years, data_streams):
+
+        filename = (
+            f"{country_name.lower().replace(' ', '_')}_forecast_{year}.grib"
+        )
+        blob_path = f"/raw/{country_name}/mars/{filename}"
+
+        upload_stream(
+            sas_token, container_name, storage_account, data_stream, blob_path
+        )
 
 
 def get_mars(iso: str):
+    logger.info(f"Retrieving data for ISO code: {iso}")
     static_df: pd.DataFrame = get_country_bbox_df()
     country_df: pd.DataFrame = static_df[static_df["iso"].isin([iso.upper()])]
 
     if country_df.empty:
-        logger.error(
-            f"{iso} is not a valid ISO code. See the docs for the list supported counbtries"  # noqa: E501
+        error_msg = (
+            f"{iso} is not a valid ISO code. "
+            "Please refer to the supported countries list."
         )
+        logger.error(error_msg)
         return
 
     if len(country_df) > 1:
-        logger.error(
-            "Internal Error: multiple countries selected by same ISO!"
-        )
+        error_msg = "Internal error: multiple entries for the same ISO code!"
+        logger.error(error_msg)
         return
 
     country_name: str = country_df.iloc[0]["name_en"]
-    country_path_name: str = country_name.replace(" ", "_").lower()
     country_bbox: str = country_df.iloc[0]["bbox"]
 
-    logger.info(f"Downloading ECMWF MARS data of {country_name} forecast..")
-    output_path: str = os.path.expanduser(
-        f"~/Downloads/mars_{country_path_name}_forecast"
-    )
-    setup_output_path(output_path)
+    logger.info(f"Downloading ECMWF MARS data for {country_name}...")
 
-    years: List[int] = list(range(1981, 2023))
+    # Defining the period of years to download
+    years: List[int] = list(range(1981, 1983))
+
+    # List to hold data streams
+    data_streams: List[BytesIO] = []
 
     for year in years:
-        file_name: str = f"{country_path_name}_ecmwf_hres_seas5_{year}.grib"
-        print(file_name)
-        download_ecmwf_mars(year, output_path, file_name, country_bbox)
+        logger.info(f"Processing data for the year: {year}")
+        data_stream = download_ecmwf_mars(year, country_bbox)
+        data_streams.append(data_stream)
+
+    upload_to_cloud(
+        data_streams,
+        sas_token,
+        container_name,
+        storage_account,
+        country_name,
+        years,
+    )
+
+    return data_streams
 
 
 if __name__ == "__main__":

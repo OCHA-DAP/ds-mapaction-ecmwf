@@ -1,4 +1,5 @@
 import os
+from io import BytesIO
 from typing import Any, Dict, Optional
 
 import pandas as pd
@@ -62,21 +63,23 @@ def get_ecmwf_mars_metadata(
 
 def download_ecmwf_mars(
     year: int,
-    download_path: str,
-    file_name: str,
     bounding_box: str,
     ensemble_numbers: Optional[str] = None,
     fcmonth: str = DEFAULT_FCMONTH,
     grid: str = DEFAULT_GRID,
-):
+) -> BytesIO:
+    # Determine the ensemble numbers based on the year if not provided
     numbers: str = (
         ensemble_numbers if ensemble_numbers else get_ensemble_numbers(year)
     )
     dates: str = get_dates(year)
-    file_path: str = os.path.join(download_path, file_name)
 
+    # Prepare metadata for the MARS request
     ecmwf_mars_metadata: Dict[str, Any] = get_ecmwf_mars_metadata(
         dates, bounding_box, numbers, fcmonth, grid
     )
 
-    download_mars(ecmwf_mars_metadata, file_path)
+    # Download the data using the revised
+    # in-memory handling download_mars function
+    data_stream = download_mars(ecmwf_mars_metadata)
+    return data_stream

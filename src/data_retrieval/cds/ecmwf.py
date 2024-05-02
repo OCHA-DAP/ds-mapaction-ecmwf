@@ -1,4 +1,4 @@
-import os
+from io import BytesIO
 from typing import Any, Dict, List
 
 from .common import download_cds
@@ -26,20 +26,10 @@ def get_ecmwf_cds_metadata(
     return ecmwf_cds_metadata
 
 
-# Downloading data with a single request
 def download_ecmwf_cds(
-    years: List[int],
-    months: List[int],
-    leadtime_months: List[int],
-    download_path: str,
-    file_name: str,
-):
-    retrieve_name: str = "seasonal-monthly-single-levels"
-    file_path: str = os.path.join(download_path, file_name)
-
-    ecmwf_cds_metadata: Dict[str, Any] = get_ecmwf_cds_metadata(
-        years, months, leadtime_months
-    )
-    ecmwf_cds_metadata["target"] = file_path
-
-    download_cds(retrieve_name, ecmwf_cds_metadata, file_path)
+    years: List[int], months: List[int], leadtime_months: List[int]
+) -> BytesIO:
+    retrieve_name = "seasonal-monthly-single-levels"
+    metadata = get_ecmwf_cds_metadata(years, months, leadtime_months)
+    data_stream = download_cds(retrieve_name, metadata)
+    return data_stream
