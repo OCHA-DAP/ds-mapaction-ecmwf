@@ -1,5 +1,6 @@
 import os
-from typing import Any, Dict, List
+from io import BytesIO
+from typing import Any, Dict, List, Optional
 
 from .common import download_cds
 
@@ -20,14 +21,26 @@ def get_era5_cds_metadata(
 
 
 def download_era5_cds(
-    years: List[int], months: List[int], download_path: str, file_name: str
-):
-    retrieve_name: str = "reanalysis-era5-single-levels-monthly-means"
-    file_path: str = os.path.join(download_path, file_name)
-    file_type: str = file_name.split(".")[-1]
+    years: List[int],
+    months: List[int],
+    file_name: str,
+    download_path: Optional[str] = None,
+) -> Optional[BytesIO]:
+    retrieve_name = "reanalysis-era5-single-levels-monthly-means"
+    file_type = file_name.split(".")[
+        -1
+    ]  # Assumes file_name includes an extension
 
-    era5_cds_metadata: Dict[str, Any] = get_era5_cds_metadata(
-        years, months, file_type
-    )
+    # Prepare metadata with appropriate file type
+    era5_cds_metadata = get_era5_cds_metadata(years, months, file_type)
 
-    download_cds(retrieve_name, era5_cds_metadata, file_path)
+    if download_path:
+        # Construct the full file path if a download path is specified
+        file_path = os.path.join(download_path, file_name)
+        download_cds(retrieve_name, era5_cds_metadata, file_path)
+        print(f"Downloaded: {file_path}")
+    else:
+        # No file path specified, return data as BytesIO object
+        data_stream = download_cds(retrieve_name, era5_cds_metadata)
+        print("Data downloaded into memory")
+        return data_stream

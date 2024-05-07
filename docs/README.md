@@ -13,3 +13,4 @@ Welcome to `ds-mapaction-ecmwf` documentation.
   * [Supported countries](ecmwf-mars.md#supported-countries)
   * [Reference material](ecmwf-mars.md#reference-material)
   * [Troubleshooting](ecmwf-mars.md#troubleshooting)
+* [Azure Blob Storage Setup](azure-blob-storage.md)

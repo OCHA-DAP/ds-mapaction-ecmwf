@@ -30,10 +30,18 @@ To retrieve ECMWF MARS data set, navigate to the root directory
 cd ds-mapaction-ecmwf/
 ```
 
-and run
+and run one of the following options:
 
 ```bash
 poetry run python src/data_retrieval mars [country-iso]
+```
+
+```bash
+poetry run python src/data_retrieval mars ETH --local /path/to/save
+```
+
+```bash
+poetry run python src/data_retrieval mars ETH --upload
 ```
 
 for example to download the data for Ethiopia, run

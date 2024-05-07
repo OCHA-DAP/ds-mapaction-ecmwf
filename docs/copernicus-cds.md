@@ -27,10 +27,24 @@ navigate to the root directory
 cd ds-mapaction-ecmwf/
 ```
 
-and run
+and run one of the following options:
+
+Download Locally to the Default Directory:
 
 ```bash
 poetry run python src/data_retrieval cds ecmwf
+```
+
+Specify a Custom Local Path:
+
+```bash
+poetry run python src/data_retrieval cds ecmwf --local /path/to/save
+```
+
+Upload to the Cloud:
+
+```bash
+poetry run python src/data_retrieval cds ecmwf --upload
 ```
 
 Your request will be placed in a queue, and the process will wait for your turn.  
@@ -69,10 +83,18 @@ navigate to the root directory
 cd ds-mapaction-ecmwf/
 ```
 
-and run
+and run one of the following options:  
 
 ```bash
 poetry run python src/data_retrieval cds era5
+```
+
+```bash
+poetry run python src/data_retrieval cds era5 --local /path/to/save
+```
+
+```bash
+poetry run python src/data_retrieval cds era5 --upload
 ```
 
 Your request will be placed in a queue, and the process will wait for your turn.  
