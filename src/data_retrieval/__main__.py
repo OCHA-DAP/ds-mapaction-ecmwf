@@ -8,8 +8,6 @@ from cds.era5 import download_era5_cds
 from cds.mars import download_ecmwf_mars, get_country_bbox_df
 from util import get_logger, setup_output_path
 
-sas_token, container_name, storage_account = load_env_vars()
-
 logger = get_logger(__name__)
 
 parser = argparse.ArgumentParser(
@@ -22,37 +20,33 @@ subparsers = parser.add_subparsers(
 parser_cds = subparsers.add_parser("cds", help="Copernicus CDS")
 parser_mars = subparsers.add_parser("mars", help="ECMWF MARS")
 
-parser_cds.add_argument(
-    "type", choices=["ecmwf", "era5"], help="Data types"
-)  # noqa: E501
+parser_cds.add_argument("type", choices=["ecmwf", "era5"], help="Data types")
 parser_cds.add_argument(
     "--local", help="Local directory path to save files", type=str
-)  # noqa: E501
+)
 parser_cds.add_argument(
     "--upload",
     help="Flag to upload data to cloud instead of saving locally",
     action="store_true",
-)  # noqa: E501
+)
 
-parser_mars = subparsers.add_parser("mars", help="ECMWF MARS")  # noqa: E501
+parser_mars = subparsers.add_parser("mars", help="ECMWF MARS")
 parser_mars.add_argument(
     "iso",
     help="Country ISO code. See docs for the list of supported countries",
-)  # noqa: E501
+)
 parser_mars.add_argument(
     "--local", help="Local directory path to save files", type=str
-)  # noqa: E501
+)
 parser_mars.add_argument(
     "--upload",
     help="Flag to upload data to cloud instead of saving locally",
     action="store_true",
-)  # noqa: E501
+)
 
 
 def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
-    logger.info(
-        "Downloading Copernicus CDS data of ECMWF global forecast..."
-    )  # noqa: E501
+    logger.info("Downloading Copernicus CDS data of ECMWF global forecast...")
 
     # Define parameters 1981 to 2024 or 1982 to test
     available_years = list(range(1981, 2024))
@@ -61,9 +55,7 @@ def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
 
     # Default path if no local_path is provided and not uploading
     if not local_path and not upload:
-        local_path = os.path.expanduser(
-            "~/Downloads/ecmwf_global_forecast"
-        )  # noqa: E501
+        local_path = os.path.expanduser("~/Downloads/ecmwf_global_forecast")
 
     if local_path:
         # Local download
@@ -71,8 +63,9 @@ def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
         setup_output_path(local_path)
         download_ecmwf_cds(
             available_years, months, leadtime_months, local_path, file_name
-        )  # noqa: E501
+        )
     elif upload:
+        sas_token, container_name, storage_account = load_env_vars()
         # Upload to cloud, handle the stream
         data_stream = download_ecmwf_cds(
             available_years, months, leadtime_months
@@ -86,13 +79,13 @@ def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
     else:
         logger.error(
             "No valid operation specified. Please provide a local path or set upload to True."  # noqa: E501
-        )  # noqa: E501
+        )
 
 
 def get_cds_era5(local_path: Optional[str] = None, upload: bool = False):
     logger.info(
         "Downloading Copernicus CDS data of ERA5 total precipitation.."
-    )  # noqa: E501
+    )
     file_name = "era5_total_precipitation_global_1981_2023_all_months.grib"
 
     # Define the years and months for the single request
@@ -108,6 +101,7 @@ def get_cds_era5(local_path: Optional[str] = None, upload: bool = False):
         setup_output_path(local_path)
         download_era5_cds(years, months, file_name, download_path=local_path)
     elif upload and not local_path:
+        sas_token, container_name, storage_account = load_env_vars()
         # Download data into memory and upload to cloud
         data_stream = download_era5_cds(years, months, file_name)
         blob_path = "/raw/glb/era5/era5-total-precipitation-1981-2023.grib"
@@ -117,7 +111,7 @@ def get_cds_era5(local_path: Optional[str] = None, upload: bool = False):
     else:
         logger.error(
             "No valid operation specified. Please provide a local path or set upload to True."  # noqa: E501
-        )  # noqa: E501
+        )
 
 
 def upload_to_cloud(
@@ -148,7 +142,7 @@ def get_mars(iso: str, local_path: Optional[str] = None, upload: bool = False):
     if country_df.empty:
         logger.error(
             f"{iso} is not a valid ISO code. Please refer to the supported countries list."  # noqa: E501
-        )  # noqa: E501
+        )
         return
 
     if len(country_df) > 1:
@@ -163,7 +157,7 @@ def get_mars(iso: str, local_path: Optional[str] = None, upload: bool = False):
     if not local_path and not upload:
         local_path = os.path.expanduser(
             f"~/Downloads/mars_{country_name.replace(' ', '_').lower()}_forecast"  # noqa: E501
-        )  # noqa: E501
+        )
 
     # Defining the period of years to download 1981 to 2023 or 1982 to test
     years = list(range(1981, 2023))
@@ -177,8 +171,9 @@ def get_mars(iso: str, local_path: Optional[str] = None, upload: bool = False):
                 country_bbox,
                 download_path=local_path,
                 file_name=file_name,
-            )  # noqa: E501
+            )
     elif upload and not local_path:
+        sas_token, container_name, storage_account = load_env_vars()
         # List to hold data streams if uploading
         data_streams = []
         for year in years:
@@ -197,7 +192,7 @@ def get_mars(iso: str, local_path: Optional[str] = None, upload: bool = False):
     else:
         logger.error(
             "Invalid configuration. Use either --local [path], --upload, or none to use the default path."  # noqa: E501
-        )  # noqa: E501
+        )
 
 
 if __name__ == "__main__":

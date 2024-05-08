@@ -41,5 +41,6 @@ def download_ecmwf_cds(
         file_path = os.path.join(download_path, file_name)
         metadata["target"] = file_path
         download_cds(retrieve_name, metadata, file_path)
+        return None
     else:
         return download_cds(retrieve_name, metadata)

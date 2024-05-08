@@ -37,6 +37,7 @@ def download_cds(
         # Save directly to the specified path
         client.retrieve(name, metadata, file_path)
         print(f"Downloaded locally: {file_path}")
+        return None
     else:
         # Use a temporary file for in-memory operations
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
@@ -58,6 +59,7 @@ def download_mars(
         # Download directly to the specified file path
         server.execute(metadata, file_path)
         print(f"Downloaded: {file_path}")
+        return None
     else:
         # Use a temporary file to handle the
         # download and return a BytesIO object

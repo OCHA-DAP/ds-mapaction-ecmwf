@@ -30,11 +30,3 @@ Update your current session with the changes by sourcing the .bashrc file
 ```bash
    source ~/.bashrc
    ```
-
-### Install Required Packages
-
-Before running the scripts, ensure that all required Python packages are installed.
-
-```bash
-poetry add azure-storage-blob
-```
