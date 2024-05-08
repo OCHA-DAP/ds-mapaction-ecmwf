@@ -70,10 +70,9 @@ def download_ecmwf_mars(
     fcmonth: str = DEFAULT_FCMONTH,
     grid: str = DEFAULT_GRID,
 ) -> Optional[BytesIO]:
-    # Determine the ensemble numbers based on the year if not provided
     numbers: str = (
         ensemble_numbers if ensemble_numbers else get_ensemble_numbers(year)
-    )  # noqa: E501
+    )
     dates: str = get_dates(year)
 
     # Prepare metadata for the MARS request
