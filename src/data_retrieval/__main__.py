@@ -30,7 +30,6 @@ parser_cds.add_argument(
     action="store_true",
 )
 
-parser_mars = subparsers.add_parser("mars", help="ECMWF MARS")
 parser_mars.add_argument(
     "iso",
     help="Country ISO code. See docs for the list of supported countries",
