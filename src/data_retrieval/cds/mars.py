@@ -83,10 +83,8 @@ def download_ecmwf_mars(
     if download_path and file_name:
         file_path = os.path.join(download_path, file_name)
         download_mars(ecmwf_mars_metadata, file_path)
-        print(f"Downloaded: {file_path}")
         return None
     else:
         # If file_path is not provided, download the data to memory
         data_stream = download_mars(ecmwf_mars_metadata)
-        print("Data downloaded into memory")
         return data_stream

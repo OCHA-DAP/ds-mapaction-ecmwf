@@ -38,10 +38,8 @@ def download_era5_cds(
         # Construct the full file path if a download path is specified
         file_path = os.path.join(download_path, file_name)
         download_cds(retrieve_name, era5_cds_metadata, file_path)
-        print(f"Downloaded: {file_path}")
         return None
     else:
         # No file path specified, return data as BytesIO object
         data_stream = download_cds(retrieve_name, era5_cds_metadata)
-        print("Data downloaded into memory")
         return data_stream

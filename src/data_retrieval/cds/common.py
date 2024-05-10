@@ -58,7 +58,7 @@ def download_mars(
     if file_path:
         # Download directly to the specified file path
         server.execute(metadata, file_path)
-        print(f"Downloaded: {file_path}")
+        print(f"Downloaded locally: {file_path}")
         return None
     else:
         # Use a temporary file to handle the
