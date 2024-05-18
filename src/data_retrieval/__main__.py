@@ -26,7 +26,7 @@ parser_cds.add_argument(
     choices=["grib", "netcdf"],
     default="grib",
     help="File format",
-    type=str,  # noqa: E501
+    type=str,
 )
 parser_cds.add_argument(
     "--local", help="Local directory path to save files", type=str
@@ -92,7 +92,7 @@ def get_cds_era5(
     local_path: Optional[str] = None,
     upload: bool = False,
     file_format: str = "grib",
-):  # noqa: E501
+):
     logger.info(
         "Downloading Copernicus CDS data of ERA5 total precipitation.."
     )
