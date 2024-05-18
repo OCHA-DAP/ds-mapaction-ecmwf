@@ -30,16 +30,36 @@ To retrieve ECMWF MARS data set, navigate to the root directory
 cd ds-mapaction-ecmwf/
 ```
 
-and run
+and run one of the following options:
+
+to save file locally either run
 
 ```bash
 poetry run python src/data_retrieval mars [country-iso]
 ```
 
-for example to download the data for Ethiopia, run
+or
+
+```bash
+poetry run python src/data_retrieval mars [country-iso] --local /path/to/save
+```
+
+or to upload to Azure Blob Storage
+
+```bash
+poetry run python src/data_retrieval mars [country-iso] --upload
+```
+
+for example to download the data for Ethiopia locally, run
 
 ```bash
 poetry run python src/data_retrieval mars ETH
+```
+
+or to download the data for Ethiopia and upload it to Azure, run
+
+```bash
+poetry run python src/data_retrieval mars ETH --upload
 ```
 
 ### Supported countries
