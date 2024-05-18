@@ -22,6 +22,13 @@ parser_mars = subparsers.add_parser("mars", help="ECMWF MARS")
 
 parser_cds.add_argument("type", choices=["ecmwf", "era5"], help="Data types")
 parser_cds.add_argument(
+    "--format",
+    choices=["grib", "netcdf"],
+    default="grib",
+    help="File format",
+    type=str,  # noqa: E501
+)
+parser_cds.add_argument(
     "--local", help="Local directory path to save files", type=str
 )
 parser_cds.add_argument(
@@ -81,11 +88,17 @@ def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
         )
 
 
-def get_cds_era5(local_path: Optional[str] = None, upload: bool = False):
+def get_cds_era5(
+    local_path: Optional[str] = None,
+    upload: bool = False,
+    file_format: str = "grib",
+):  # noqa: E501
     logger.info(
         "Downloading Copernicus CDS data of ERA5 total precipitation.."
     )
-    file_name = "era5_total_precipitation_global_1981_2023_all_months.grib"
+    file_name = (
+        f"era5_total_precipitation_global_1981_2023_all_months.{file_format}"
+    )
 
     # Define the years and months for the single request
     years = list(range(1981, 2024))
@@ -103,7 +116,9 @@ def get_cds_era5(local_path: Optional[str] = None, upload: bool = False):
         sas_token, container_name, storage_account = load_env_vars()
         # Download data into memory and upload to cloud
         data_stream = download_era5_cds(years, months, file_name)
-        blob_path = "/raw/glb/era5/era5-total-precipitation-1981-2023.grib"
+        blob_path = (
+            f"/raw/glb/era5/era5-total-precipitation-1981-2023.{file_format}"
+        )
         upload_stream(
             sas_token, container_name, storage_account, data_stream, blob_path
         )
@@ -201,7 +216,11 @@ if __name__ == "__main__":
         if args.type == "ecmwf":
             get_cds_ecmwf(local_path=args.local, upload=args.upload)
         elif args.type == "era5":
-            get_cds_era5(local_path=args.local, upload=args.upload)
+            get_cds_era5(
+                local_path=args.local,
+                upload=args.upload,
+                file_format=args.format,
+            )
 
     elif args.command == "mars":
         get_mars(args.iso, local_path=args.local, upload=args.upload)

@@ -27,9 +27,9 @@ def download_era5_cds(
     download_path: Optional[str] = None,
 ) -> Optional[BytesIO]:
     retrieve_name = "reanalysis-era5-single-levels-monthly-means"
-    file_type = file_name.split(".")[
-        -1
-    ]  # Assumes file_name includes an extension
+    file_type = (
+        file_name.split(".")[-1] if file_name else "grib"
+    )  # Assumes file_name includes an extension
 
     # Prepare metadata with appropriate file type
     era5_cds_metadata = get_era5_cds_metadata(years, months, file_type)
