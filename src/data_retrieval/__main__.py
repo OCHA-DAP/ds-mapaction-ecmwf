@@ -57,7 +57,7 @@ def get_cds_ecmwf(
     format: str = "grib",
 ):
     logger.info(f"Downloading ECMWF data in {format} format...")
-    available_years = list(range(1981, 1983))
+    available_years = list(range(1981, 2024))
     months = list(range(1, 13))
     leadtime_months = list(range(1, 7))
 
