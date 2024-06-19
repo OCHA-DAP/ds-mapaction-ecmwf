@@ -57,7 +57,7 @@ def get_cds_ecmwf(
     format: str = "grib",
 ):
     logger.info(f"Downloading ECMWF data in {format} format...")
-    available_years = list(range(1981, 2024))
+    available_years = list(range(1981, 1983))
     months = list(range(1, 13))
     leadtime_months = list(range(1, 7))
 
@@ -65,7 +65,7 @@ def get_cds_ecmwf(
     if not local_path and not upload:
         local_path = os.path.expanduser("~/Downloads/ecmwf_global_forecast")
 
-    if local_path:
+    if local_path and not upload:
         setup_output_path(local_path)
         if format == "grib":
             file_name = "ecmwf-monthly-seasonalforecast-1981-2023.grib"
@@ -73,9 +73,9 @@ def get_cds_ecmwf(
                 available_years,
                 months,
                 leadtime_months,
-                file_name,
                 local_path,
                 format,
+                file_name,
             )
             file_path = os.path.join(local_path, file_name)
             logger.info(f"Data downloaded and saved to {file_path}")
@@ -87,13 +87,13 @@ def get_cds_ecmwf(
                         [year],
                         months,
                         [leadtime_month],
-                        file_name,
                         local_path,
                         format,
+                        file_name,
                     )
                     file_path = os.path.join(local_path, file_name)
                     logger.info(f"Data downloaded and saved to {file_path}")
-    elif upload:
+    elif upload and not local_path:
         sas_token, container_name, storage_account = load_env_vars()
         if format == "grib":
             file_name = "ecmwf-monthly-seasonalforecast-1981-2023.grib"
@@ -101,7 +101,6 @@ def get_cds_ecmwf(
                 available_years,
                 months,
                 leadtime_months,
-                file_name,
                 format=format,
             )
             blob_path = f"/raw/glb/ecmwf/{file_name}"
@@ -121,7 +120,6 @@ def get_cds_ecmwf(
                         [year],
                         months,
                         [leadtime_month],
-                        file_name,
                         format=format,
                     )
                     blob_path = f"/raw/glb/ecmwf/{file_name}"

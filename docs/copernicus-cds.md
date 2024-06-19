@@ -49,14 +49,14 @@ poetry run python src/data_retrieval cds ecmwf --upload
 
 **File format selection:**
 
-User can specify which format to download [ grib or netcdf ] by running one of the following options:
+User can specify which format to download [ grib or netcdf ] by running one of the following options if not specify .grib is the default:
 
 ```bash
-poetry run python src/data_retrieval cds ecmwf --format netcdf
+poetry run python src/data_retrieval cds ecmwf --format [grib or netcdf]
 ```
 
 ```bash
-poetry run python src/data_retrieval cds ecmwf --format netcdf --local ~/Downloads/test1_ecmwf
+poetry run python src/data_retrieval cds ecmwf --format [grib or netcdf] --local /path/to/save
 ```
 
 ```bash
@@ -116,11 +116,11 @@ poetry run python src/data_retrieval cds era5 --upload
 Or you can specify which format to download [ grib or netcdf ] by running one of the following options:
 
 ```bash
-poetry run python src/data_retrieval cds era5 --format netcdf
+poetry run python src/data_retrieval cds era5 --format [grib or netcdf]
 ```
 
 ```bash
-poetry run python src/data_retrieval cds era5 --format netcdf --local ~/Downloads/test2_era5
+poetry run python src/data_retrieval cds era5 --format [grib or netcdf] --local ~/Downloads/test2_era5
 ```
 
 ```bash
