@@ -47,6 +47,22 @@ Upload to the Cloud:
 poetry run python src/data_retrieval cds ecmwf --upload
 ```
 
+**File format selection:**
+
+User can specify which format to download [ grib or netcdf ] by running one of the following options:
+
+```bash
+poetry run python src/data_retrieval cds ecmwf --format netcdf
+```
+
+```bash
+poetry run python src/data_retrieval cds ecmwf --format netcdf --local ~/Downloads/test1_ecmwf
+```
+
+```bash
+poetry run python src/data_retrieval cds ecmwf --format [grib or netcdf] --upload
+```
+
 Your request will be placed in a queue, and the process will wait for your turn.  
 You should see something like this:
 
