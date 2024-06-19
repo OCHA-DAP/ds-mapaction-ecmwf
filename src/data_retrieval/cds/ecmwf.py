@@ -24,7 +24,6 @@ def get_ecmwf_cds_metadata(
         "leadtime_month": [
             str(leadtime_month) for leadtime_month in leadtime_months
         ],
-        # 'area' parameter removed to target the whole globe
     }
 
     return ecmwf_cds_metadata

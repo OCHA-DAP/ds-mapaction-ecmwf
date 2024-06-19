@@ -15,8 +15,6 @@ def get_era5_cds_metadata(
         "month": [f"{month:02d}" for month in months],
         "time": "00:00",
         "format": file_type,
-        # 'area':[32.77,2.09,48.28,15.11],
-        # Area of interest: ETH, commented out to target the whole globe
     }
 
     return era5_cds_metadata
