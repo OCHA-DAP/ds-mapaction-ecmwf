@@ -178,7 +178,6 @@ def pre_process_ecmwf_data(input_file_path, admin_boundary_file_path, ref_grid_f
 	print('pre-processing ECMWF data...')
 
 	admin_df = gpd.read_file(admin_boundary_file_path)
-	admin_df = admin_df.tail(1).reset_index(drop = True)
 	bbox = admin_df.geometry.unary_union.bounds
 
 
@@ -277,7 +276,6 @@ def pre_process_era5_data(era5_file_path, ecmwf_file_path, admin_boundary_file_p
 
 
 	admin_df = gpd.read_file(admin_boundary_file_path)
-	admin_df = admin_df.tail(1).reset_index(drop = True)
 	bbox = admin_df.geometry.unary_union.bounds
 
 	#Load both ERA5 and ECMWF initial grib file, re-grid the ERA5 dataset to match the one from ECMWF and returns it on 
