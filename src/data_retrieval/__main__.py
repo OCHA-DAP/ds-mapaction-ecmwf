@@ -51,10 +51,12 @@ parser_mars.add_argument(
 )
 
 
-def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
-    logger.info("Downloading Copernicus CDS data of ECMWF global forecast...")
-
-    # Define parameters 1981 to 2024 or 1982 to test
+def get_cds_ecmwf(
+    local_path: Optional[str] = None,
+    upload: bool = False,
+    format: str = "grib",
+):
+    logger.info(f"Downloading ECMWF data in {format} format...")
     available_years = list(range(1981, 2024))
     months = list(range(1, 13))
     leadtime_months = list(range(1, 7))
@@ -63,25 +65,72 @@ def get_cds_ecmwf(local_path: Optional[str] = None, upload: bool = False):
     if not local_path and not upload:
         local_path = os.path.expanduser("~/Downloads/ecmwf_global_forecast")
 
-    if local_path:
-        # Local download
-        file_name = "ecmwf_forecast_global_all_years.grib"
+    if local_path and not upload:
         setup_output_path(local_path)
-        download_ecmwf_cds(
-            available_years, months, leadtime_months, local_path, file_name
-        )
-    elif upload:
+        if format == "grib":
+            file_name = "ecmwf-monthly-seasonalforecast-1981-2023.grib"
+            download_ecmwf_cds(
+                available_years,
+                months,
+                leadtime_months,
+                local_path,
+                format,
+                file_name,
+            )
+            file_path = os.path.join(local_path, file_name)
+            logger.info(f"Data downloaded and saved to {file_path}")
+        else:  # netcdf format
+            for year in available_years:
+                for leadtime_month in leadtime_months:
+                    file_name = f"ecmwf-global-forecast-{year}-lt{leadtime_month}.{format}"  # noqa: E501
+                    download_ecmwf_cds(
+                        [year],
+                        months,
+                        [leadtime_month],
+                        local_path,
+                        format,
+                        file_name,
+                    )
+                    file_path = os.path.join(local_path, file_name)
+                    logger.info(f"Data downloaded and saved to {file_path}")
+    elif upload and not local_path:
         sas_token, container_name, storage_account = load_env_vars()
-        # Upload to cloud, handle the stream
-        data_stream = download_ecmwf_cds(
-            available_years, months, leadtime_months
-        )
-        blob_path = (
-            "/raw/glb/ecmwf/ecmwf-monthly-seasonalforecast-1981-2023.grib"
-        )
-        upload_stream(
-            sas_token, container_name, storage_account, data_stream, blob_path
-        )
+        if format == "grib":
+            file_name = "ecmwf-monthly-seasonalforecast-1981-2023.grib"
+            data_stream = download_ecmwf_cds(
+                available_years,
+                months,
+                leadtime_months,
+                format=format,
+            )
+            blob_path = f"/raw/glb/ecmwf/{file_name}"
+            upload_stream(
+                sas_token,
+                container_name,
+                storage_account,
+                data_stream,
+                blob_path,
+            )
+            logger.info(f"Data uploaded to {blob_path}")
+        else:  # netcdf format
+            for year in available_years:
+                for leadtime_month in leadtime_months:
+                    file_name = f"ecmwf-monthly-seasonalforecast-{year}-lt{leadtime_month}.{format}"  # noqa: E501
+                    data_stream = download_ecmwf_cds(
+                        [year],
+                        months,
+                        [leadtime_month],
+                        format=format,
+                    )
+                    blob_path = f"/raw/glb/ecmwf/{file_name}"
+                    upload_stream(
+                        sas_token,
+                        container_name,
+                        storage_account,
+                        data_stream,
+                        blob_path,
+                    )
+                    logger.info(f"Data uploaded to {blob_path}")
     else:
         logger.error(
             "No valid operation specified. Please provide a local path or set upload to True."  # noqa: E501
@@ -214,7 +263,11 @@ if __name__ == "__main__":
 
     if args.command == "cds":
         if args.type == "ecmwf":
-            get_cds_ecmwf(local_path=args.local, upload=args.upload)
+            get_cds_ecmwf(
+                local_path=args.local,
+                upload=args.upload,
+                format=args.format,
+            )
         elif args.type == "era5":
             get_cds_era5(
                 local_path=args.local,
