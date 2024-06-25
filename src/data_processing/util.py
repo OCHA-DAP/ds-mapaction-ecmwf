@@ -1,4 +1,3 @@
-import sys
 from typing import List, Optional
 
 import geopandas as gpd
@@ -188,14 +187,13 @@ def regrid_climate_data(
     -------
 
     """
-    if "xesmf" not in sys.modules:
-        import xesmf as xe
+    from xesmf import Regridder
 
     # Re-grid of ERA5 data following the ECMWF grid (1deg)
     era_ds: xr.Dataset = _load_climate_data(era5_file_path)
     ecmwf_ds: xr.Dataset = _load_climate_data(ecmwf_file_path, None, 0)
 
-    regridder = xe.Regridder(era_ds, ecmwf_ds, "conservative")
+    regridder = Regridder(era_ds, ecmwf_ds, "conservative")
 
     era1deg_ds: xr.Dataset = regridder(era_ds, keep_attrs=True)
     era1deg_ds.to_netcdf(era5_regrid_file_path)
@@ -377,8 +375,8 @@ def pre_process_era5_data(
     -------
 
     """
-    admin_df = gpd.read_file(admin_boundary_file_path)
-    bbox = admin_df.geometry.unary_union.bounds
+    admin_gdf = gpd.read_file(admin_boundary_file_path)
+    bbox = admin_gdf.geometry.unary_union.bounds
 
     # Load both ERA5 data (after regridding)
     input_xr = _load_climate_data(era5_file_path, bbox)
@@ -456,7 +454,9 @@ def pre_process_era5_data(
     data_adm_df.to_parquet(adm_output_file_path, compression="gzip")
 
 
-def ecmwf_bias_correction(ecmwf_file_path, era5_file_path, output_file_path):
+def ecmwf_bias_correction(
+    ecmwf_file_path: str, era5_file_path: str, output_file_path: str
+):
     """
     Compute the bias between the average precipitation prediction
     (ECMWF) and ground truth (ERA5) per location, month, model and lead time.
@@ -531,7 +531,7 @@ def ecmwf_bias_correction(ecmwf_file_path, era5_file_path, output_file_path):
 
 
 def compute_quantile_probability(
-    input_file_path, climatology_file_path, output_file_path
+    input_file_path: str, climatology_file_path: str, output_file_path: str
 ):
     """
     Computes the probability of the ECMWF predicted precipitation being under
