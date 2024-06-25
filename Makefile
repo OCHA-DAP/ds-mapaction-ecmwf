@@ -23,6 +23,7 @@ lint:
 clean:
 	@echo "Removing .venv"
 	@rm -rf .venv
+	@poetry env remove --all
 
 docker-build:
 	@echo "Building Docker image.."
@@ -30,7 +31,6 @@ docker-build:
 
 docker-run:
 	@echo "Starting container.."
-	# @docker compose run --rm mapaction /bin/bash
 	@docker compose run --rm mapaction
 
 docker-clean:

@@ -17,8 +17,8 @@ ENV SHELL=/bin/bash \
     GROUP_ID=${GROUP_ID} \
     PYTHON_VERSION=${PYTHON_VERSION} \
     PATH=/home/${USER_NAME}/.local/bin:${PATH} \
-    HOME=/home/${USER_NAME}
-    # POETRY_VIRTUALENVS_CREATE=false
+    HOME=/home/${USER_NAME} \
+    POETRY_VIRTUALENVS_IN_PROJECT=false
 
 USER root
 
