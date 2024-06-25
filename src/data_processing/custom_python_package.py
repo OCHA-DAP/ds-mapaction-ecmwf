@@ -5,10 +5,10 @@ import xarray as xr
 import pandas as pd
 import geopandas as gpd
 import cfgrib
-import xesmf as xe
+#import xesmf as xe
 
 ##################################################################
-def _load_climate_data(input_file_path, bbox, filter_value = None):
+def _load_climate_data(input_file_path, bbox = None, filter_value = None):
 	"""
 	Loads climate data from and input file and returns it on a xarray format.
 	For the moment only grib files are accepted but this function can be adapted to cover other file formats.
@@ -26,8 +26,12 @@ def _load_climate_data(input_file_path, bbox, filter_value = None):
 
 	"""
 
-	#Load grib data into pandas dataframe. Change this function if another data format is used
-	input_xr = xr.open_dataset(input_file_path, engine="cfgrib")
+	#Load climate data (grib or netcdf) into pandas dataframe. Change this function if another data format is used
+	if input_file_path.endswith('.grib'):
+		input_xr = xr.open_dataset(input_file_path, engine="cfgrib")
+	elif input_file_path.endswith('.nc'):
+		input_xr = xr.open_dataset(input_file_path)
+
 
 	#Filter only one ensemble model number when loading ECMWF
 	if filter_value != None:
@@ -35,43 +39,15 @@ def _load_climate_data(input_file_path, bbox, filter_value = None):
 
 	#Filter grid points within the zone of interest bounding box
 	#Adding a buffer of 1deg to include nearby grid points
-	lon_min,lat_min,lon_max, lat_max = bbox
-	input_xr = input_xr.where(input_xr['longitude'] > lon_min - 1, drop = True)
-	input_xr = input_xr.where(input_xr['longitude'] < lon_max + 1, drop = True)
-	input_xr = input_xr.where(input_xr['latitude'] > lat_min - 1, drop = True)
-	input_xr = input_xr.where(input_xr['latitude'] < lat_max + 1, drop = True)
+	if bbox != None:
+		lon_min,lat_min,lon_max, lat_max = bbox
+		input_xr = input_xr.where(input_xr['longitude'] > lon_min - 1, drop = True)
+		input_xr = input_xr.where(input_xr['longitude'] < lon_max + 1, drop = True)
+		input_xr = input_xr.where(input_xr['latitude'] > lat_min - 1, drop = True)
+		input_xr = input_xr.where(input_xr['latitude'] < lat_max + 1, drop = True)
 
 
 	return(input_xr)
-
-##################################################################
-def _regrid_climate_data(era5_file_path, ecmwf_file_path, bbox):
-	"""
-	Re-gridding of a climate dataset following a reference dataset. The result is returned as a DataFrame.
-	The current version uses the xesmf package
-
-
-    Parameters
-    ----------
-	era5_file_path: str, Path to the ERA5 climate data to be processed
-	ecmwf_file_path: str, Path to the climate data file used as a reference grid (ECMWF) 
-	bbox: float list, Coordinates of the bounding box containing the zone of interest 
-
-	Returns
-    -------
-	DataFrame, Resulting ERA5 dataset following the new grid
-	
-	"""
-
-	#Re-grid of ERA5 data following the ECMWF grid (1deg)
-	ds_era = _load_climate_data(era5_file_path, bbox)
-	ds_ecmwf = _load_climate_data(ecmwf_file_path, bbox, 0)
-	regridder = xe.Regridder(ds_era, ds_ecmwf, "conservative")
-	ds_era1deg = regridder(ds_era, keep_attrs=True)
-	df = ds_era1deg.to_dataframe().dropna().reset_index()
-
-	return(df)
-
 
 ##################################################################
 def _create_reference_grid(input_df, admin_df, admin_code_label):
@@ -154,6 +130,34 @@ def _compute_era5_climatology(input_df, geom_id_label):
 
 
 ##################################################################
+def regrid_climate_data(era5_file_path, ecmwf_file_path, era5_regrid_file_path):
+	"""
+	Re-gridding of a climate dataset following a reference dataset. The result is exported as a NetCDF file.
+	The current version uses the xesmf package
+
+
+    Parameters
+    ----------
+	era5_file_path: str, Path to the ERA5 climate data to be processed
+	ecmwf_file_path: str, Path to the climate data file used as a reference grid (ECMWF) 
+	era5_regrid_file_path: str, Path to the ERA5 climate data after regridding
+
+	Returns
+    -------
+	
+	"""
+
+	#Re-grid of ERA5 data following the ECMWF grid (1deg)
+	ds_era = _load_climate_data(era5_file_path)
+	ds_ecmwf = _load_climate_data(ecmwf_file_path, None, 0)
+	regridder = xe.Regridder(ds_era, ds_ecmwf, "conservative")
+	ds_era1deg = regridder(ds_era, keep_attrs=True)
+	ds_era1deg.to_netcdf(era5_regrid_file_path)
+
+	return()
+
+
+##################################################################
 def pre_process_ecmwf_data(input_file_path, admin_boundary_file_path, ref_grid_file_path, pixel_output_file_path, adm_output_file_path, admin_code_label):
 	"""
 	Loads the ECMWF climate data grib file and converts it to a DataFrame. Also adapt columns names, precipitation units and link grid 
@@ -182,7 +186,7 @@ def pre_process_ecmwf_data(input_file_path, admin_boundary_file_path, ref_grid_f
 
 
 	#Executes each ensemble model separately  
-	for batch_number in range(0,51):
+	for batch_number in range(0,51): 
 
 		#Prints out progress
 		if batch_number % 10 == 0:
@@ -253,7 +257,7 @@ def pre_process_ecmwf_data(input_file_path, admin_boundary_file_path, ref_grid_f
 	return
 
 ##################################################################
-def pre_process_era5_data(era5_file_path, ecmwf_file_path, admin_boundary_file_path, ref_grid_file_path, pixel_output_file_path, adm_output_file_path):
+def pre_process_era5_data(era5_file_path, admin_boundary_file_path, ref_grid_file_path, pixel_output_file_path, adm_output_file_path):
 	"""
 	Loads the ERA5 climate data grib file and converts it to a DataFrame. Also adapt columns names, precipitation units and link grid 
 	points to administrative boundaries. Finally, computes the average climatology (per location and month) and export the resulting 
@@ -263,7 +267,6 @@ def pre_process_era5_data(era5_file_path, ecmwf_file_path, admin_boundary_file_p
     Parameters
     ----------
 	era5_file_path: str, Path to the ERA5 climate data grib file to be processed
-	ecmwf_file_path: str, Path to the ECMWF climate data grib file 
 	admin_boundary_file_path: str, Path to the admin boundary file to be used when aggregating grid points
 	ref_grid_file_path: str, Path where the reference grid, combining both grid points and admin boundaries link, is to be exported 
 	pixel_output_file_path: str, Path where the processed file at the grid point level should be exported
@@ -278,9 +281,9 @@ def pre_process_era5_data(era5_file_path, ecmwf_file_path, admin_boundary_file_p
 	admin_df = gpd.read_file(admin_boundary_file_path)
 	bbox = admin_df.geometry.unary_union.bounds
 
-	#Load both ERA5 and ECMWF initial grib file, re-grid the ERA5 dataset to match the one from ECMWF and returns it on 
-	#a DataFrame format
-	era5_df = _regrid_climate_data(era5_file_path,ecmwf_file_path,bbox)
+	#Load both ERA5 data (after regridding)
+	input_xr = _load_climate_data(era5_file_path, bbox)
+	era5_df = input_xr.to_dataframe().dropna().reset_index()
 	grid_df = gpd.read_parquet(ref_grid_file_path) 
 
 	#Extract month and year information.  
