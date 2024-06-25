@@ -23,6 +23,10 @@ done in collaboration with MapAction.
 
 We use **[Poetry](https://python-poetry.org/)** for package management. Poetry is production tested dependency management tool with exact version locking and support for packaging and virtual environments.
 
+We also use **[Docker](https://docs.docker.com/engine/install/ubuntu/)** development environement in cases where we need to work with libraries that depend on compiled binaries.
+
+The minimum tested Docker version: `26.1.1`
+
 ### Installing Poetry
 
 :book: [Install Poetry on Linux, macOS, Windows (WSL)](https://python-poetry.org/docs/#installing-with-the-official-installer) using the official installer
