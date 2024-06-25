@@ -1,0 +1,15 @@
+services:
+  mapaction:
+    container_name: mapaction
+    build:
+      context: .
+      args:
+          USER_ID: ${USER_ID:-1000}
+          GROUP_ID: ${GROUP_ID:-1000}
+          USER_NAME: ${USER_NAME:-mapaction}
+          GROUP_NAME: ${GROUP_NAME:-mapaction}
+    image: mapaction-img
+    volumes:
+      # souce
+      - .:/home/${USER_NAME:-mapaction}/src
+    network_mode: "host"
