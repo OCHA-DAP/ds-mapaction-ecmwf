@@ -1,33 +1,34 @@
 # Data Processing
 
 * [Setup](#setup)
-* [Clean-up](#clean-up)
 
 ![data processing architecture](./images/data-flow-diagram.svg)
 
 ### Setup
 
-Docker image is built by default with `mapaction` user and group name, and the ids set to `1000`. To change it, create new `.env` file in top directory, copy content of `.env.example` file into it, and change the variables to your prefered values.
-
-build Docker image
+> **NOTE:** If you want to start fresh or remove an existing virtual environment, run:
 
 ```bash
-make docker-build
+make clean
 ```
 
-start Docker container
+> **NOTE:** Run the following command to create a virtual environment and install the necessary libraries using poetry through the Makefile
 
 ```bash
-make docker-run
+make .venv hooks
 ```
 
-when inside of Docker container, install Poetry dependencies
+### Prepare Data Directory
+
+Inside the notebooks/ directory, create a new directory called data/:
 
 ```bash
-make clean .venv
+mkdir -p notebooks/data
 ```
 
-> **NOTE:** You will have to install the dependencies each time you start the Docker container. That is by design, so the Docker image does not have stored stale dependency chain.
+Copy the input_data/ directory from Google Drive into the newly created data/ directory.
+
+### Start Jupyter Lab
 
 run `jupyterlab`
 
@@ -35,44 +36,8 @@ run `jupyterlab`
 poetry run jupyter lab
 ```
 
-### Clean-up
+### Run Notebooks
 
-once you have finished your work, and terminated `jupyterlab`
-
-terminate the container, by exit from it's console
-
-```bash
-exit
-```
-
-when Dockerfile is updated, you can rebuild the image by running
-
-```bash
-make docker-clean docker-build
-```
-
-Docker cache can take up huge amount of storage over time.  
-
-check how much disk space is Docker using
-
-```bash
-docker system df
-```
-
-remove build cache
-
-```bash
-docker buildx prune -f
-```
-
-you can also check for any unused Docker images
-
-```bash
-docker image ls
-```
-
-and remove them by running
-
-```bash
-docker image rm <image-id>
-```
+* In your browser, navigate to the Jupyter Lab interface.
+* First, open and run every cell in the ecmwf_pipeline.ipynb.
+* After the pipeline notebook has completed, open and run ecmwf_analysis.ipynb to obtain the results.
