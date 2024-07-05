@@ -762,7 +762,7 @@ def plot_accuracy_map(plot_df, quantile_value_list):
         plot_df.plot(column=acc_label, legend=True, cmap="OrRd", ax=ax)
 
         ax.set_title(
-            "Accuracy score per leadtime and threshold value \n (quantile = "
+            "Accuracy score per location \n (quantile = "
             + quantile_label
             + ")"
         )
