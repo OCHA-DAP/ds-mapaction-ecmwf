@@ -4,6 +4,7 @@ import pandas as pd
 import xarray as xr
 
 
+##################################################################
 def _load_climate_data(input_file_path, bbox=None, filter_value=None):
     """
         Loads climate data from and input file
@@ -56,6 +57,7 @@ def _load_climate_data(input_file_path, bbox=None, filter_value=None):
     return input_xr
 
 
+##################################################################
 def _create_reference_grid(input_df, admin_df, admin_code_label):
     """
         Create a reference lat/lon grid based on the ECMWF grid.
@@ -114,65 +116,7 @@ def _create_reference_grid(input_df, admin_df, admin_code_label):
     return grid_df
 
 
-def _compute_era5_climatology(input_df, geom_id_label):
-    """
-        Compute the climatology per location
-        (pixel or admin boundary) based one ERA5.
-        The climatology includes the average
-        precipitation per month but also different
-        quantiles (50%, 33%, 25% and 20%)
-
-
-    Parameters
-    ----------
-        input_df: DataFrame, DataFrame containing ERA5 climate data
-        geom_id_label: str,
-        Name of the column containing the unique geometry id.
-        It can be either pixel_geom_id or adm_pcode
-
-        Returns
-    -------
-        DataFrame, Adds two set of columns
-        climatology_q and prob_q) to the input DataFrame.
-        climatology_qX is the X% precipitation quantile
-        for a given location and month. prob_qX has a value of 1 (0 otherwise)
-        if, for a given location, month and year, the precipitation level
-        is below the climatology X% precipitation quantile.
-        The name "prob" is used
-        to keep the same nomenclature of the ECMWF dataset where
-        an ensemble model is used
-
-    """
-
-    df = input_df.copy()
-
-    # Compute climatology average and quantiles
-    # (50%, 33%, 25% and 20%) for any given location and month
-    climatology_era5_df = (
-        df.groupby([geom_id_label, "valid_time_month"])
-        .agg(
-            climatology_avg=("tp_mm_day", lambda x: x.mean()),
-            climatology_q50=("tp_mm_day", lambda x: x.quantile(1 / 2)),
-            climatology_q33=("tp_mm_day", lambda x: x.quantile(1 / 3)),
-            climatology_q25=("tp_mm_day", lambda x: x.quantile(1 / 4)),
-            climatology_q20=("tp_mm_day", lambda x: x.quantile(1 / 5)),
-        )
-        .reset_index()
-    )
-
-    df = pd.merge(
-        df, climatology_era5_df, on=[geom_id_label, "valid_time_month"]
-    )
-
-    # Computes, for a given location, month and year,
-    # if the precipiation level
-    # is below the corresponding climatology quantile
-    for q in ["50", "33", "25", "20"]:
-        df["prob_q" + q] = (df["tp_mm_day"] <= df["climatology_q" + q]) * 1
-
-    return df
-
-
+##################################################################
 def _regrid_climate_data(input_df, ref_df, variable_name):
     """
     Re-gridding of a climate dataset
@@ -243,6 +187,7 @@ def _regrid_climate_data(input_df, ref_df, variable_name):
     return df
 
 
+##################################################################
 def pre_process_ecmwf_data(
     input_file_path,
     admin_boundary_file_path,
@@ -331,7 +276,7 @@ def pre_process_ecmwf_data(
         )
         df["pixel_geom_id"] = df["pixel_geom_id"].apply(lambda x: hash(x))
         lat_lon_df = df[["latitude", "longitude", "pixel_geom_id"]].copy()
-        lat_lon_df = lat_lon_df.drop_duplicates()
+        lat_lon_df = lat_lon_df
 
         # Computes a reference grid by
         # linking grid points to administrative boundaries.
@@ -399,6 +344,7 @@ def pre_process_ecmwf_data(
     return
 
 
+##################################################################
 def pre_process_era5_data(
     era5_file_path,
     admin_boundary_file_path,
@@ -488,10 +434,6 @@ def pre_process_era5_data(
         .reset_index()
     )
 
-    # Compute ERA5 climatology
-    data_grid_df = _compute_era5_climatology(data_grid_df, "pixel_geom_id")
-    data_adm_df = _compute_era5_climatology(data_adm_df, "adm_pcode")
-
     # Export data to parquet file
     data_grid_df.to_parquet(pixel_output_file_path, compression="gzip")
     data_adm_df.to_parquet(adm_output_file_path, compression="gzip")
@@ -500,7 +442,7 @@ def pre_process_era5_data(
 
 
 ##################################################################
-def ecmwf_bias_correction(ecmwf_file_path, era5_file_path, output_file_path):
+def ecmwf_bias_correction(ecmwf_file_path, era5_file_path):
     """
         Compute the bias between the average precipitation prediction
         (ECMWF) and ground truth (ERA5)
@@ -511,8 +453,6 @@ def ecmwf_bias_correction(ecmwf_file_path, era5_file_path, output_file_path):
     ----------
         ecmwf_file_path: str, Path to the processed ECMWF climate data
         era5_file_path: str, Path to the processed ERA5 climate data
-        output_file_path: str,
-        Path where the bias-corrected ECMWF file should be exported
 
         Returns
     -------
@@ -534,150 +474,64 @@ def ecmwf_bias_correction(ecmwf_file_path, era5_file_path, output_file_path):
 
     # Computes average precipitation for a given location and month
     # (also model number and lead time in the case of ECMWF)
+    ecmwf_corr_df["tp_mm_day_mean_raw"] = ecmwf_corr_df.groupby(
+        ["number", geom_id, "valid_time_month", "lead_time"]
+    )[["tp_mm_day"]].transform("mean")
+
+    ecmwf_corr_df["tp_mm_day_mean_ref"] = ecmwf_corr_df.groupby(
+        [geom_id, "valid_time_month"]
+    )[["tp_mm_day"]].transform("mean")
+
     era5_avg_df = (
         era5_df.groupby([geom_id, "valid_time_month"])["tp_mm_day"]
-        .mean()
-        .reset_index()
-    )
-    ecmwf_avg_df = (
-        ecmwf_df.groupby(["number", geom_id, "valid_time_month", "lead_time"])[
-            ["tp_mm_day"]
-        ]
         .mean()
         .reset_index()
     )
 
     # Compute bias between the average precipitation
     # per location, month, model and lead time
-    avg_df = pd.merge(
-        ecmwf_avg_df,
+    ecmwf_corr_df = pd.merge(
+        ecmwf_corr_df,
         era5_avg_df,
         on=["valid_time_month", geom_id],
-        suffixes=("_ecmwf", "_era5"),
+        suffixes=("", "_mean_era5"),
     )
-    avg_df["bias"] = avg_df["tp_mm_day_ecmwf"] - avg_df["tp_mm_day_era5"]
-    avg_df.drop(["tp_mm_day_ecmwf", "tp_mm_day_era5"], inplace=True, axis=1)
 
     # Correct the bias by adding (or subtracting)
     # the average bias to every single prediction.
     # Limits the result to only positive values
     # (negative values are possible
     # when subtracting bias for small predictions)
-    ecmwf_corr_df = pd.merge(
-        ecmwf_corr_df,
-        avg_df,
-        on=["number", "valid_time_month", geom_id, "lead_time"],
+
+    ecmwf_corr_df["tp_mm_day_bias_corrected"] = (
+        ecmwf_corr_df["tp_mm_day"]
+        - ecmwf_corr_df["tp_mm_day_mean_raw"]
+        + ecmwf_corr_df["tp_mm_day_mean_ref"]
     )
-    ecmwf_corr_df["tp_mm_day"] = (
-        ecmwf_corr_df["tp_mm_day"] - ecmwf_corr_df["bias"]
+    ecmwf_corr_df.loc[
+        ecmwf_corr_df["tp_mm_day_bias_corrected"] < 0,
+        "tp_mm_day_bias_corrected",
+    ] = 0
+
+    ecmwf_corr_df["tp_mm_day_era5_calibrated"] = (
+        ecmwf_corr_df["tp_mm_day"]
+        - ecmwf_corr_df["tp_mm_day_mean_raw"]
+        + ecmwf_corr_df["tp_mm_day_mean_era5"]
     )
-    ecmwf_corr_df.loc[ecmwf_corr_df["tp_mm_day"] < 0, "tp_mm_day"] = 0
-    ecmwf_corr_df.drop(["bias"], inplace=True, axis=1)
+    ecmwf_corr_df.loc[
+        ecmwf_corr_df["tp_mm_day_era5_calibrated"] < 0,
+        "tp_mm_day_era5_calibrated",
+    ] = 0
+
+    ecmwf_corr_df.drop(
+        ["tp_mm_day_mean_raw", "tp_mm_day_mean_ref", "tp_mm_day_mean_era5"],
+        inplace=True,
+        axis=1,
+    )
+
+    ecmwf_corr_df.rename(columns={"tp_mm_day": "tp_mm_day_raw"}, inplace=True)
 
     # Export resulting ECMWF bias-corrected dataFrame to a parquet file
-    ecmwf_corr_df.to_parquet(output_file_path, compression="gzip")
-
-    return
-
-
-def compute_quantile_probability(
-    input_file_path, climatology_file_path, output_file_path
-):
-    """
-        Computes the probability of the ECMWF
-        predicted precipitation being under different quantile thresholds
-        foe every location, month and year.
-        Quantiles thresholds are computd from ERA5
-        climatology for a given location and month.
-        Different thresholds are used following the quantiles values
-        (quantiles 50%, 33%, 25% and 20%).
-        Probability is based on the share of ECMWF model predicting
-        a below quantile value.
-        Individual predictions bias and
-        mean absolute error are also computed.
-
-
-
-    Parameters
-    ----------
-        input_file_path: str,
-        Path to the processed ECMWF climate data
-        (before or after bias correction)
-        climatology_file_path: str,
-        Path to the processed ERA5 climate data
-        containing the climatology data
-        output_file_path: str,
-        Path where the computed quantiles probability
-        and bias / maae score ECMWF file should be exported
-
-        Returns
-    -------
-
-    """
-    # Load ECMWF and ERA5 processed dataFrames from parquet files.
-    ecmwf_prob_df = pd.read_parquet(input_file_path)
-    era5_df = pd.read_parquet(climatology_file_path)
-
-    # Detects which location is being used
-    # (pixel or adminstrative boundary level)
-    if "adm_pcode" in ecmwf_prob_df.columns.values:
-        geom_id = "adm_pcode"
-    else:
-        geom_id = "pixel_geom_id"
-
-    # Extracts the climatology per location and month
-    # (every year has the same value)
-    climatology_era5_df = era5_df[
-        [
-            geom_id,
-            "valid_time_month",
-            "climatology_q50",
-            "climatology_q33",
-            "climatology_q25",
-            "climatology_q20",
-        ]
-    ].drop_duplicates()
-    # Merges ECMWF dataFrame with the corresponding ERA5 climatology
-    ecmwf_prob_df = pd.merge(
-        ecmwf_prob_df, climatology_era5_df, on=[geom_id, "valid_time_month"]
-    )
-
-    # Compute a flag (1 or 0) to indicates if a given prediction
-    # (location, month, year and ensemble model number)
-    # is below the ERA5 climatology
-    # for the same location and month.
-    # This is used later to compute the probability based on all models
-    for q in ["50", "33", "25", "20"]:
-        ecmwf_prob_df["prob_q" + q] = (
-            ecmwf_prob_df["tp_mm_day"] <= ecmwf_prob_df["climatology_q" + q]
-        ) * 1
-
-    # Combine all model predictions
-    # into a single average value plus the probability
-    # of it being under each climatology quantile.
-    ecmwf_prob_df = (
-        ecmwf_prob_df.groupby(
-            [geom_id, "valid_time_year", "valid_time_month", "lead_time"]
-        )[["tp_mm_day", "prob_q50", "prob_q33", "prob_q25", "prob_q20"]]
-        .mean()
-        .reset_index()
-    )
-
-    # Compute bias and MAE (mean absolute error)
-    # for every single ECMWF prediction compared to ERA5 values
-    ecmwf_prob_df = pd.merge(
-        ecmwf_prob_df,
-        era5_df,
-        on=[geom_id, "valid_time_year", "valid_time_month"],
-        suffixes=("", "_era5"),
-        how="left",
-    )
-    ecmwf_prob_df["bias"] = (
-        ecmwf_prob_df["tp_mm_day"] - ecmwf_prob_df["tp_mm_day_era5"]
-    )
-    ecmwf_prob_df["mae"] = abs(ecmwf_prob_df["bias"])
-
-    # Export resulting ECMWF dataFrame to a parquet file
-    ecmwf_prob_df.to_parquet(output_file_path, compression="gzip")
+    ecmwf_corr_df.to_parquet(ecmwf_file_path, compression="gzip")
 
     return
