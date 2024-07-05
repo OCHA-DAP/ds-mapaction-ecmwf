@@ -177,6 +177,21 @@ tests-mypy = ["mypy (>=1.6)", "pytest-mypy-plugins"]
 tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "autopep8"
+version = "2.3.1"
+description = "A tool that automatically formats Python code to conform to the PEP 8 style guide"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "autopep8-2.3.1-py2.py3-none-any.whl", hash = "sha256:a203fe0fcad7939987422140ab17a930f684763bf7335bdb6709991dd7ef6c2d"},
+    {file = "autopep8-2.3.1.tar.gz", hash = "sha256:8d6c87eba648fdcfc83e29b788910b8643171c395d9c4bcf115ece035b9c9dda"},
+]
+
+[package.dependencies]
+pycodestyle = ">=2.12.0"
+tomli = {version = "*", markers = "python_version < \"3.11\""}
+
+[[package]]
 name = "azure-core"
 version = "1.30.2"
 description = "Microsoft Azure Core Library for Python"
@@ -2262,6 +2277,26 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx", "sphinxcontrib-github-al
 test = ["pep440", "pre-commit", "pytest", "testpath"]
 
 [[package]]
+name = "nbqa"
+version = "1.8.5"
+description = "Run any standard Python code quality tool on a Jupyter Notebook"
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "nbqa-1.8.5-py3-none-any.whl", hash = "sha256:fe59ccb66f29bda2912c75cacf9cdbd34504923effb58ae1c88211d075213eff"},
+    {file = "nbqa-1.8.5.tar.gz", hash = "sha256:91624e9c747bbe38ff14ebf75d17cfb838b5c0432b039bcb7e8ad0bb423ef7ef"},
+]
+
+[package.dependencies]
+autopep8 = ">=1.5"
+ipython = ">=7.8.0"
+tokenize-rt = ">=3.2.0"
+tomli = "*"
+
+[package.extras]
+toolchain = ["black", "blacken-docs", "flake8", "isort", "jupytext", "mypy", "pylint", "pyupgrade", "ruff"]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 description = "Patch asyncio to allow nested event loops"
@@ -3691,6 +3726,17 @@ doc = ["sphinx", "sphinx_rtd_theme"]
 test = ["pytest", "ruff"]
 
 [[package]]
+name = "tokenize-rt"
+version = "5.2.0"
+description = "A wrapper around the stdlib `tokenize` which roundtrips."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "tokenize_rt-5.2.0-py2.py3-none-any.whl", hash = "sha256:b79d41a65cfec71285433511b50271b05da3584a1da144a0752e9c621a285289"},
+    {file = "tokenize_rt-5.2.0.tar.gz", hash = "sha256:9fe80f8a5c1edad2d3ede0f37481cc0cc1538a2f442c9c2f9e4feacd2792d054"},
+]
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -3961,4 +4007,4 @@ xarray = ">=0.16.2"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "ae93e4c0b65b66302dbdeae44048f88c44c9478ef52bfd29ab0fddb319612731"
+content-hash = "e969cc64eb823bb9b7d7b3b862660cb551777201dae245ef284e89cb3d8a5bf2"

@@ -25,18 +25,16 @@ clean:
 	@rm -rf .venv
 	@poetry env remove --all
 
-docker-build:
-	@echo "Building Docker image.."
-	@docker compose build --no-cache
+data-ecmwf:
+	@echo "Automatically retrieving ECMWF data..."
+	@poetry run python src/data_retrieval cds ecmwf --upload
 
-docker-run:
-	@echo "Starting container.."
-	@docker compose run --rm mapaction
+data-era5:
+	@echo "Automatically retrieving ERA5 data..."
+	@poetry run python src/data_retrieval cds era5 --upload
 
-docker-clean:
-	@echo "Deleting Docker image.."
-	@docker image rm $(IMAGE_NAME)
-
+data-pipeline: data-ecmwf data-era5
+	@echo "Data extraction and upload pipeline completed."
 
 help:
 	@echo "Available make targets:"

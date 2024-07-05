@@ -4,7 +4,6 @@ import pandas as pd
 import xarray as xr
 
 
-##################################################################
 def _load_climate_data(input_file_path, bbox=None, filter_value=None):
     """
         Loads climate data from an input file
@@ -57,7 +56,6 @@ def _load_climate_data(input_file_path, bbox=None, filter_value=None):
     return input_xr
 
 
-##################################################################
 def _create_reference_grid(input_df, admin_df, admin_code_label):
     """
         Create a reference lat/lon grid based on the ECMWF grid.
@@ -118,7 +116,6 @@ def _create_reference_grid(input_df, admin_df, admin_code_label):
     return grid_df
 
 
-##################################################################
 def _regrid_climate_data(input_df, ref_df, variable_name):
     """
     Re-gridding of a climate dataset
@@ -189,7 +186,6 @@ def _regrid_climate_data(input_df, ref_df, variable_name):
     return df
 
 
-##################################################################
 def pre_process_ecmwf_data(
     input_file_path,
     admin_boundary_file_path,
@@ -349,7 +345,6 @@ def pre_process_ecmwf_data(
     return
 
 
-##################################################################
 def pre_process_era5_data(
     era5_file_path,
     admin_boundary_file_path,
@@ -408,7 +403,6 @@ def pre_process_era5_data(
     # Converting both into mm/day here
     era5_df["tp_mm_day"] = era5_df["tp"] * 1000
 
-    ##########################
     # Regried ERA5 data to lower resolution.Link it to reference grid
     # and retrieve pixel hash code and admin1 pcode
     era5_regrided_df = _regrid_climate_data(era5_df, grid_df, "tp_mm_day")
@@ -444,7 +438,6 @@ def pre_process_era5_data(
     return
 
 
-##################################################################
 def ecmwf_bias_correction(ecmwf_file_path, era5_file_path):
     """
         Compute both the ECMWF lead-time bias and the bias (calibration)

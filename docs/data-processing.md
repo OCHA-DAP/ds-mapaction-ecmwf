@@ -20,13 +20,17 @@ make .venv hooks
 
 ### Prepare Data Directory
 
-Inside the notebooks/ directory, create a new directory called data/:
+Set up the data environment variables and paths in your Python script to manage data files and directories. Below is the necessary configuration:
 
 ```bash
-mkdir -p notebooks/data
+mkdir -p ~/ma-chd-data/data/input_data
 ```
 
 Copy the input_data/ directory from Google Drive into the newly created data/ directory.
+
+### Data Directory Structure
+
+> **NOTE:** Ensure that your directory structure under ~/ma-chd-data/data/ includes input_data/
 
 ### Start Jupyter Lab
 

@@ -5,7 +5,6 @@ import pandas as pd
 from sklearn import metrics
 
 
-##################################################################
 def compute_quantile_probability(
     input_df, quantile_value_list, tp_col_name="tp_mm_day_raw"
 ):
@@ -113,7 +112,6 @@ def compute_quantile_probability(
     return df
 
 
-##################################################################
 def prepare_climatology(ecmwf_df, era5_df):
     """
         Prepare the data for the climatology plot, climatology meaning
@@ -151,7 +149,6 @@ def prepare_climatology(ecmwf_df, era5_df):
     return ecmwf_plot_df, era5_plot_df
 
 
-##################################################################
 def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
     """
         Prepare the data for the climatology plot, climatology meaning
@@ -218,7 +215,6 @@ def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
     return
 
 
-##################################################################
 def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
     """
         Prepare the data for the ECMWF-ERA5 bias leadtime dependency plot.
@@ -292,7 +288,6 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
     return plot_df
 
 
-##################################################################
 def plot_leadtime_month_dependency(plot_df, scope_text):
     """
         Prepare the data for the climatology plot, climatology meaning
@@ -362,7 +357,6 @@ def plot_leadtime_month_dependency(plot_df, scope_text):
     return
 
 
-##################################################################
 def plot_performance_analysis(
     ecmwf_df, era5_df, quantile_value_list, month_range
 ):
@@ -521,7 +515,6 @@ def plot_performance_analysis(
     return
 
 
-##################################################################
 def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
     """
         Plot ROC (Receiver operating characteristic) and AUC
@@ -644,7 +637,6 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
     return
 
 
-##################################################################
 def preparece_accuracy_map(
     ecmwf_df,
     era5_df,
@@ -742,7 +734,6 @@ def preparece_accuracy_map(
     return accuracy_map_gdf
 
 
-##################################################################
 def plot_accuracy_map(plot_df, quantile_value_list):
     """
         Plot a map with Accuracy values between ECMWF and ERA5. The plot
