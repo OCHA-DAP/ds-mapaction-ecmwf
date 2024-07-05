@@ -6,7 +6,7 @@ from sklearn import metrics
 
 
 def compute_quantile_probability(
-    input_df, quantile_value_list, tp_col_name="tp_mm_day_raw"
+    input_df, quantile_value_list, tp_col_name="tp_mm_day_bias_corrected"
 ):
     """
         Computes the probability of the ECMWF
@@ -32,9 +32,6 @@ def compute_quantile_probability(
         ECMWF precipitation value - tp_mm_day_raw for the original value,
         tp_mm_day_bias_corrected for the value after leadtime bias-correction
         and tp_mm_day_era5_calibrated for the ERA5-calibrated data.
-        Climatology and quantile probabilities use the same data to compute
-        distributions so the results will be very similar
-
     Returns
     -------
         df: DataFrame, Resulting dataset with quantile climatology
@@ -44,7 +41,7 @@ def compute_quantile_probability(
 
     df = input_df.copy()
 
-    # Detects which location is being used
+    # Detects which location is being  used
     # (pixel or adminstrative boundary level)
     if "adm_pcode" in df.columns.values:
         geom_id = "adm_pcode"

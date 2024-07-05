@@ -21,7 +21,7 @@ def _load_climate_data(input_file_path, bbox=None, filter_value=None):
 
         Returns
     -------
-        DataFrame, A xarray with the data contained in the input file
+        DataFrame, A xarray with the data contained  in the input file
 
     """
 
