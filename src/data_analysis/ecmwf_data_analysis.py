@@ -6,7 +6,9 @@ from sklearn import metrics
 
 
 ##################################################################
-def compute_quantile_probability(input_df, quantile_value_list, tp_col_name):
+def compute_quantile_probability(
+    input_df, quantile_value_list, tp_col_name="tp_mm_day_raw"
+):
     """
         Computes the probability of the ECMWF
         predicted precipitation being under different quantile thresholds
@@ -24,18 +26,20 @@ def compute_quantile_probability(input_df, quantile_value_list, tp_col_name):
 
     Parameters
     ----------
-        input_file_path: str,
-        Path to the processed ECMWF climate data
-        (before or after bias correction)
-        climatology_file_path: str,
-        Path to the processed ERA5 climate data
-        containing the climatology data
-        output_file_path: str,
-        Path where the computed quantiles probability
-        and bias / maae score ECMWF file should be exported
+        input_df: DataFrame, Dataset with climate data
+        quantile_value_list: list, List with different quantile levels
+        to be computed
+        tp_col_name: str, Indicates column to be used for
+        ECMWF precipitation value - tp_mm_day_raw for the original value,
+        tp_mm_day_bias_corrected for the value after leadtime bias-correction
+        and tp_mm_day_era5_calibrated for the ERA5-calibrated data.
+        Climatology and quantile probabilities use the same data to compute
+        distributions so the results will be very similar
 
-        Returns
+    Returns
     -------
+        df: DataFrame, Resulting dataset with quantile climatology
+        and probability
 
     """
 
@@ -57,10 +61,11 @@ def compute_quantile_probability(input_df, quantile_value_list, tp_col_name):
         "tp_mm_day",
     ]
 
+    # If only one quantile value is given, transform it into a
+    # single-element list
     if not isinstance(quantile_value_list, list):
         quantile_value_list = [quantile_value_list]
 
-    # Computes climatology
     for quantile_value in quantile_value_list:
         # Compute climatology average and quantiles
         # for any given location and month
@@ -110,7 +115,23 @@ def compute_quantile_probability(input_df, quantile_value_list, tp_col_name):
 
 ##################################################################
 def prepare_climatology(ecmwf_df, era5_df):
+    """
+        Prepare the data for the climatology plot, climatology meaning
+        here the typical year distribution for both ECMWF and ERA5
 
+
+    Parameters
+    ----------
+        ecmwf_df: DataFrame, ECMWF processed data
+        era5_df: DataFrame, ERA5 processed data
+
+        Returns
+    -------
+        ecmwf_plot_df: DataFrame, ECMWF data aggregated per month/leadtime
+        era5_plot_df: DataFrame, ERA5 data aggregated per month
+    """
+
+    # Computes the ECMWF climatology per leadtime
     ecmwf_plot_df = (
         ecmwf_df.groupby(["valid_time_month", "lead_time"])[
             [
@@ -122,6 +143,7 @@ def prepare_climatology(ecmwf_df, era5_df):
         .mean()
         .reset_index()
     )
+    # Computes the ERA5 climatology
     era5_plot_df = (
         era5_df.groupby(["valid_time_month"])["tp_mm_day"].mean().reset_index()
     )
@@ -131,8 +153,27 @@ def prepare_climatology(ecmwf_df, era5_df):
 
 ##################################################################
 def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
+    """
+        Prepare the data for the climatology plot, climatology meaning
+        here the typical year distribution for both ECMWF and ERA5
 
+
+    Parameters
+    ----------
+        ecmwf_plot_df: DataFrame, ECMWF climatology per leadtime
+        era5_plot_df: DataFrame, ERA5 climatology
+        scope_text: str, Text used for plot title
+
+        Returns
+    -------
+    """
+
+    # One plot per ECMWF precipitation value: raw data, leadtime-bias
+    # corrected and ERA5-calibrated
     fig, axs = plt.subplots(ncols=3, nrows=1, figsize=(15, 6))
+
+    leadtime_list = ecmwf_plot_df["lead_time"].unique()
+
     for col in range(3):
 
         ax = axs[col]
@@ -152,14 +193,15 @@ def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
             era5_plot_df["tp_mm_day"],
             label="era5",
         )
-        for i in range(1, 7):
+        # Loop through all leadtimes
+        for leadtime in leadtime_list:
             ecmwf_leadtime_plot_df = ecmwf_plot_df[
-                ecmwf_plot_df["lead_time"] == i
+                ecmwf_plot_df["lead_time"] == leadtime
             ]
             ax.plot(
                 ecmwf_leadtime_plot_df["valid_time_month"],
                 ecmwf_leadtime_plot_df[col_name],
-                label="lead_time: " + str(i),
+                label="lead_time: " + str(leadtime),
             )
 
         ax.set_title(
@@ -178,12 +220,30 @@ def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
 
 ##################################################################
 def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
+    """
+        Prepare the data for the ECMWF-ERA5 bias leadtime dependency plot.
 
+
+    Parameters
+    ----------
+        ecmwf_df: DataFrame, ECMWF processed data
+        era5_df: DataFrame, ERA5 processed data
+        month_range: list, Months to be included in the analysis
+
+        Returns
+    -------
+        plot_df: DataFrame, Single DataFrame with bias and mae
+        per month and leadtime
+    """
+
+    # Detects which location is being used
+    # (pixel or adminstrative boundary level)
     if "adm_pcode" in ecmwf_df.columns.values:
         geom_id = "adm_pcode"
     else:
         geom_id = "pixel_geom_id"
 
+    # Aggregates average precipitation per location, year, month and leadtime
     ecmwf_df = (
         ecmwf_df.groupby(
             [geom_id, "valid_time_year", "valid_time_month", "lead_time"]
@@ -198,6 +258,7 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
         .reset_index()
     )
 
+    # Merge ECMWF with ERA5 data
     plot_df = pd.merge(
         ecmwf_df,
         era5_df,
@@ -206,8 +267,10 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
     )
     plot_df = plot_df[plot_df["valid_time_month"].isin(month_range)]
 
+    # List containing the bias and MAE columns to be aggregated
     bias_mae_col_list = []
 
+    # 3 precipitation values (raw, leadtime-bias corrected and era5-calibrated)
     for tp_col_name in [
         "tp_mm_day_raw",
         "tp_mm_day_bias_corrected",
@@ -215,11 +278,13 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
     ]:
         bias_col_name = tp_col_name + "_bias"
         mae_col_name = tp_col_name + "_mae"
+        # compute bias and MAE between ECMWF and ERA5
         plot_df[bias_col_name] = plot_df[tp_col_name] - plot_df["tp_mm_day"]
         plot_df[mae_col_name] = abs(plot_df[bias_col_name])
         bias_mae_col_list.append(bias_col_name)
         bias_mae_col_list.append(mae_col_name)
 
+    # Aggregates bias and mae value per leadtime
     plot_df = (
         plot_df.groupby("lead_time")[bias_mae_col_list].mean().reset_index()
     )
@@ -229,59 +294,68 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
 
 ##################################################################
 def plot_leadtime_month_dependency(plot_df, scope_text):
+    """
+        Prepare the data for the climatology plot, climatology meaning
+        here the typical year distribution for both ECMWF and ERA5
 
+
+    Parameters
+    ----------
+        plot_df: DataFrame, Dataset containg bias and MAE between
+        ECMWF and ERA5 scope_text: str, Text used for plot title
+
+        Returns
+    -------
+    """
+
+    # One column for Bias and one for MAE plot
     fig, axs = plt.subplots(ncols=2, nrows=1, figsize=(15, 6))
 
     for col in range(2):
 
         ax = axs[col]
-
+        # Bias plot
         if col == 0:
-            ax.plot(
-                plot_df["lead_time"],
-                plot_df["tp_mm_day_raw_bias"],
-                label="ECMWF raw data",
-            )
-            ax.plot(
-                plot_df["lead_time"],
-                plot_df["tp_mm_day_bias_corrected_bias"],
-                label="ECMWF with leadtime bias correction",
-            )
-            ax.plot(
-                plot_df["lead_time"],
-                plot_df["tp_mm_day_era5_calibrated_bias"],
-                label="ECMWF with ERA5 calibration",
-            )
-            ax.set_title(
-                "ECMWF - ERA5 Bias evolution with lead time ("
-                + scope_text
-                + ")"
-            )
-            ax.set_ylabel("Bias (mm/day)")
+            # Column names to be used in plots
+            tp_col_names = [
+                "tp_mm_day_raw_bias",
+                "tp_mm_day_bias_corrected_bias",
+                "tp_mm_day_era5_calibrated_bias",
+            ]
+            y_label = "Bias (mm/day)"
+            title = "ECMWF - ERA5 Bias evolution with lead time ("
+        # MAE plot
         else:
-            ax.plot(
-                plot_df["lead_time"],
-                plot_df["tp_mm_day_raw_mae"],
-                label="ECMWF raw data",
-            )
-            ax.plot(
-                plot_df["lead_time"],
-                plot_df["tp_mm_day_bias_corrected_mae"],
-                label="ECMWF with leadtime bias correction",
-            )
-            ax.plot(
-                plot_df["lead_time"],
-                plot_df["tp_mm_day_era5_calibrated_mae"],
-                label="ECMWF with ERA5 calibration",
-            )
-            ax.set_title(
-                "ECMWF - ERA5 MAE evolution with lead time ("
-                + scope_text
-                + ")"
-            )
-            ax.set_ylabel("MAE (mm/day)")
-            # ax.set_ylim([-0.1,max(1.1*plot_df.mae.max(),1.1*plot_corr_df.mae.max())])
+            # Column names to be used in plots
+            tp_col_names = [
+                "tp_mm_day_raw_mae",
+                "tp_mm_day_bias_corrected_mae",
+                "tp_mm_day_era5_calibrated_mae",
+            ]
+            y_label = "MAE (mm/day)"
+            title = "ECMWF - ERA5 MAE evolution with lead time ("
 
+        # Plot the three cuvers, one per ECMWF precipitation value (raw,
+        # leadtime bias-corrected and ERA5-calibrated)
+        ax.plot(
+            plot_df["lead_time"],
+            plot_df[tp_col_names[0]],
+            label="ECMWF raw data",
+        )
+        ax.plot(
+            plot_df["lead_time"],
+            plot_df[tp_col_names[1]],
+            label="ECMWF with leadtime bias correction",
+        )
+        ax.plot(
+            plot_df["lead_time"],
+            plot_df[tp_col_names[2]],
+            label="ECMWF with ERA5 calibration",
+        )
+
+        ax.set_title(title + scope_text + ")")
+
+        ax.set_ylabel(y_label)
         ax.set_xlabel("lead time")
         ax.legend(loc="best")
 
@@ -292,12 +366,31 @@ def plot_leadtime_month_dependency(plot_df, scope_text):
 def plot_performance_analysis(
     ecmwf_df, era5_df, quantile_value_list, month_range
 ):
+    """
+        Plot MAE, Accuracy and F1-score dependency on probability threshold
+        and leadtime
 
+
+    Parameters
+    ----------
+        ecmwf_df: DataFrame, ECMWF data with quantile probabilities
+        era5_df: DataFrame, ERA5 data with quantile values
+        quantile_value_list: list, List with different quantile levels to be
+        computed
+        month_range: list, Months to be included in the analysis
+
+        Returns
+    -------
+    """
+
+    # Detects which location is being used
+    # (pixel or adminstrative boundary level)
     if "adm_pcode" in ecmwf_df.columns.values:
         geom_id = "adm_pcode"
     else:
         geom_id = "pixel_geom_id"
 
+    # Merges ECMWF and ERA5 data on location, year and month
     df = pd.merge(
         ecmwf_df,
         era5_df,
@@ -306,20 +399,27 @@ def plot_performance_analysis(
     )
     df = df[df["valid_time_month"].isin(month_range)]
 
+    # If only one quantile value is given, transform it into a
+    # single-element list
     if not isinstance(quantile_value_list, list):
         quantile_value_list = [quantile_value_list]
 
+    # One row per quantile value
     n_rows = len(quantile_value_list)
 
+    # One column per plot: MAE / Accurcay / F1-score
     fig, axs = plt.subplots(ncols=3, nrows=n_rows, figsize=(15, 6 * n_rows))
 
     for row in range(n_rows):
 
+        # Several threshold values between 0 and 1
         threshold_list = np.arange(0, 1.1, 0.1).tolist()
         leadtime_list = df["lead_time_ecmwf"].unique()
+        # One list per metric containng values per leadtime and threshold
         mae_list = []
         accuracy_list = []
         f1_score_list = []
+        # Column names to be used depending on quantile value
         quantile_value = quantile_value_list[row]
         quantile_label = "%.2f" % quantile_value
         ecmwf_prob_col_name = ("prob_q_" + quantile_label + "_ecmwf").replace(
@@ -329,11 +429,17 @@ def plot_performance_analysis(
             ".", "_"
         )
 
+        # Loop through all leadtimes and compute separate metrics for each one
         for leadtime in leadtime_list:
+            # One list per metric containng values per threshold
             mae_list_per_threshold = []
             accuracy_list_per_threshold = []
             f1_score_list_per_threshold = []
 
+            # y_true indicates if ERA5 precipitation is below the
+            # given quantile (using ERA5 distribution)
+            # y_prob indicates the percentage of ECMWF model below the
+            # given quantile (using ECMWF distribution)
             y_true = df.loc[
                 df["lead_time_ecmwf"] == leadtime, era5_prob_col_name
             ]
@@ -345,6 +451,9 @@ def plot_performance_analysis(
             )
 
             for threshold in threshold_list:
+                # y_pred indicates if the ECMWF model probability for the
+                # precipitation being below the given quantile
+                # (using ECMWF distribution) is above the given threshold
                 y_pred = y_prob > threshold
                 accuracy_list_per_threshold.append(
                     metrics.accuracy_score(y_true, y_pred)
@@ -356,13 +465,16 @@ def plot_performance_analysis(
             accuracy_list.append(accuracy_list_per_threshold)
             f1_score_list.append(f1_score_list_per_threshold)
 
+        # One column per metric (MAE / Accuracy / F1-score)
         for col in range(3):
 
+            # Check if more than one quantile value was given
             if n_rows > 1:
                 ax = axs[row, col]
             else:
                 ax = axs[col]
 
+            # MAE plot
             if col == 0:
                 ax.plot(leadtime_list, mae_list)
                 ax.set_title(
@@ -372,6 +484,7 @@ def plot_performance_analysis(
                 )
                 ax.set_ylabel("MAE")
 
+            # Accuracy plot
             elif col == 1:
                 for leadtime in leadtime_list:
                     ax.plot(
@@ -388,6 +501,7 @@ def plot_performance_analysis(
                 ax.set_xlabel("Threshold value")
                 ax.legend(loc="best")
 
+            # F1-score plot
             else:
                 for leadtime in leadtime_list:
                     ax.plot(
@@ -409,12 +523,31 @@ def plot_performance_analysis(
 
 ##################################################################
 def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
+    """
+        Plot ROC (Receiver operating characteristic) and AUC
+        (Area Under the Curve) analysis between ECMWF and ERA5
 
+
+    Parameters
+    ----------
+        ecmwf_df: DataFrame, ECMWF data with quantile probabilities
+        era5_df: DataFrame, ERA5 data with quantile values
+        quantile_value_list: list, List with different quantile levels to be
+        computed
+        month_range: list, Months to be included in the analysis
+
+        Returns
+    -------
+    """
+
+    # Detects which location is being used
+    # (pixel or adminstrative boundary level)
     if "adm_pcode" in ecmwf_df.columns.values:
         geom_id = "adm_pcode"
     else:
         geom_id = "pixel_geom_id"
 
+    # Merges ECMWF and ERA5 data on location, year and month
     df = pd.merge(
         ecmwf_df,
         era5_df,
@@ -425,16 +558,21 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
 
     leadtime_list = df["lead_time_ecmwf"].unique()
 
+    # If only one quantile value is given, transform it into a
+    # single-element list
     if not isinstance(quantile_value_list, list):
         quantile_value_list = [quantile_value_list]
 
     n_rows = len(quantile_value_list)
 
+    # One column for ROC and one for AUC plots
     fig, axs = plt.subplots(ncols=2, nrows=n_rows, figsize=(15, 6 * n_rows))
 
     for row in range(n_rows):
 
+        # AUC value list per leadtime
         auc_value_list = []
+        # Columns names to be used depending on quantile values
         quantile_value = quantile_value_list[row]
         quantile_label = "%.2f" % quantile_value
         ecmwf_prob_col_name = ("prob_q_" + quantile_label + "_ecmwf").replace(
@@ -446,11 +584,13 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
 
         for col in range(2):
 
+            # Check if more than one quantile value was given
             if n_rows > 1:
                 ax = axs[row, col]
             else:
                 ax = axs[col]
 
+            # ROC plot
             if col == 0:
 
                 title_text = (
@@ -459,15 +599,17 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
                     + ")"
                 )
 
+                # Dummy data used to create a straight diagonal line for
+                # the no skill baseline
                 plot_df = df[df["lead_time_ecmwf"] == 1]
                 fpr, tpr, thresholds = metrics.roc_curve(
                     plot_df[era5_prob_col_name], plot_df[ecmwf_prob_col_name]
                 )
                 ax.plot(fpr, fpr, label="no skill baseline")
-
                 ax.set_ylabel("True Positive Rate")
                 ax.set_xlabel("False Positive Rate")
 
+                # Computes and plots ROC curves per leadtime
                 for i in leadtime_list:
                     plot_df = df[df["lead_time_ecmwf"] == i]
                     fpr, tpr, thresholds = metrics.roc_curve(
@@ -475,15 +617,21 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
                         plot_df[ecmwf_prob_col_name],
                     )
                     ax.plot(fpr, tpr, label="lead_time: " + str(i))
+                    # Compute AUC and adds to the list (to be
+                    # plotted on the other column)
                     auc_value_list.append(metrics.auc(fpr, tpr))
 
+            # AUC plot
             else:
                 title_text = (
                     "Area Under the Curve per leadtime (quantile = "
                     + quantile_label
                     + ")"
                 )
+                # Dummy data used to create a straight line for the
+                # no skill baseline
                 ax.plot([1, 6], [0.5, 0.5], label="no skill baseline")
+                # Plots AUC curve based on the data computed from ROC
                 ax.plot(leadtime_list, auc_value_list, label="AUC")
 
                 ax.set_ylabel("AUC")
@@ -505,9 +653,31 @@ def preparece_accuracy_map(
     month_range,
     leadtime,
     threshold,
-    tp_col_name,
 ):
+    """
+        Prepare the data for the accuracy geospatial plot.
 
+
+    Parameters
+    ----------
+        ecmwf_df: DataFrame, ECMWF processed data with quantile probabilities
+        era5_df: DataFrame, ERA5 processed data with quantile values
+        admin_df: GeoDataFrame, Admin boundaries if and admin plot is used
+        quantile_value_list: list, List with different quantile levels to be
+        computed
+        month_range: list, Months to be included in the analysis
+        leadtime: int, ECMWF leadtime to be used
+        threshold: float, Probability threshold to compute True / False
+        predictions
+
+        Returns
+    -------
+        accuracy_map_gdf: GeoDataFrame, Single GeoDataFrame with accucary
+        value per location
+    """
+
+    # Detects which location is being used
+    # (pixel or adminstrative boundary level)
     if "adm_pcode" in ecmwf_df.columns.values:
         geom_id = "adm_pcode"
         column_list = [geom_id]
@@ -517,21 +687,26 @@ def preparece_accuracy_map(
 
     column_list.append("lead_time_ecmwf")
 
+    # If only one quantile value is given, transform it into a
+    # single-element list
     if not isinstance(quantile_value_list, list):
         quantile_value_list = [quantile_value_list]
 
+    # Merge ECMWF with ERA5 data
     df = pd.merge(
         ecmwf_df,
         era5_df,
         on=[geom_id, "valid_time_year", "valid_time_month"],
         suffixes=["_ecmwf", "_era5"],
     )
+    # Filter for selected months and leadtime
     df = df[
         (df["valid_time_month"].isin(month_range))
         & (df["lead_time_ecmwf"] == leadtime)
     ]
 
     for quantile_value in quantile_value_list:
+        # Colums names depending on quantile value
         quantile_label = "%.2f" % quantile_value
         acc_label = ("accuracy_q_" + quantile_label).replace(".", "_")
         ecmwf_prob_col_name = ("prob_q_" + quantile_label + "_ecmwf").replace(
@@ -540,7 +715,8 @@ def preparece_accuracy_map(
         era5_prob_col_name = ("prob_q_" + quantile_label + "_era5").replace(
             ".", "_"
         )
-
+        # Computes accuracy based on ERA5 value, ECMWF predictions and
+        # the given threshold then avarages the value per location
         df[acc_label] = (
             df[era5_prob_col_name] == (df[ecmwf_prob_col_name] > threshold) * 1
         ) * 1
@@ -550,28 +726,47 @@ def preparece_accuracy_map(
     df = df[column_list].drop_duplicates()
     df.reset_index(drop=True, inplace=True)
 
+    # Creates GeoDataFrame with geometry being points (lat/lon) or
+    # admin boundaries
     if geom_id == "adm_pcode":
-        acc_map_df = gpd.GeoDataFrame(pd.merge(df, admin_df, on="adm_pcode"))
+        accuracy_map_gdf = gpd.GeoDataFrame(
+            pd.merge(df, admin_df, on="adm_pcode")
+        )
     else:
-        acc_map_df = gpd.GeoDataFrame(
+        accuracy_map_gdf = gpd.GeoDataFrame(
             df,
             geometry=gpd.points_from_xy(df.longitude_ecmwf, df.latitude_ecmwf),
             crs="EPSG:4326",
         )
 
-    return acc_map_df
+    return accuracy_map_gdf
 
 
 ##################################################################
 def plot_accuracy_map(plot_df, quantile_value_list):
+    """
+        Plot a map with Accuracy values between ECMWF and ERA5. The plot
+        is either at pixel or administrative level depending on input geometry
 
+
+    Parameters
+    ----------
+        plot_df: DataFrame, Dataset containg accuracy score between
+        ECMWF and ERA5 quantile_value_list: list, List with different
+        quantile levels to be computed
+
+        Returns
+    -------
+    """
+
+    # One row per quantile value
     n_rows = len(quantile_value_list)
-
     fig, axs = plt.subplots(ncols=1, nrows=n_rows, figsize=(8, 6 * n_rows))
 
     for row in range(n_rows):
         ax = axs[row]
 
+        # Column names depending on quantile value
         quantile_value = quantile_value_list[row]
         quantile_label = "%.2f" % quantile_value
         acc_label = ("accuracy_q_" + quantile_label).replace(".", "_")

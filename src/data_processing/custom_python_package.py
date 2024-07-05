@@ -7,7 +7,7 @@ import xarray as xr
 ##################################################################
 def _load_climate_data(input_file_path, bbox=None, filter_value=None):
     """
-        Loads climate data from and input file
+        Loads climate data from an input file
         and returns it on a xarray format.
         For the moment only grib files are accepted,
         but this function can be adapted to cover other file formats.
@@ -92,6 +92,7 @@ def _create_reference_grid(input_df, admin_df, admin_code_label):
     # there are just outside of the admin boundary.
     # Specially necessary for
     # small admin boundaries.
+
     grid_df["geometry"] = grid_df["geometry"].buffer(0.5, cap_style=3)
 
     # Rename the admin code column name
@@ -103,6 +104,7 @@ def _create_reference_grid(input_df, admin_df, admin_code_label):
     # Finds all grid points that are close to the admin boundary
     # (intersection with the square buffer)
     grid_df = grid_df.sjoin(admin_df, how="inner", predicate="intersects")
+
     # Returns the geometry to the lat/lon point grid
     grid_df = gpd.GeoDataFrame(
         grid_df,
@@ -276,7 +278,7 @@ def pre_process_ecmwf_data(
         )
         df["pixel_geom_id"] = df["pixel_geom_id"].apply(lambda x: hash(x))
         lat_lon_df = df[["latitude", "longitude", "pixel_geom_id"]].copy()
-        lat_lon_df = lat_lon_df
+        lat_lon_df = lat_lon_df.drop_duplicates()
 
         # Computes a reference grid by
         # linking grid points to administrative boundaries.
@@ -290,9 +292,11 @@ def pre_process_ecmwf_data(
         # and administrative boundaries.
         # The groupby allows to drop grid points duplicate in the first case
         # or aggregate into admin boundaries in the second one
+
         link_df = pd.merge(
             df, grid_df, on="pixel_geom_id", suffixes=("", "_bis")
         )
+
         batch_data_grid_df = (
             link_df.groupby(
                 [
@@ -308,6 +312,7 @@ def pre_process_ecmwf_data(
             .mean()
             .reset_index()
         )
+
         batch_data_adm_df = (
             link_df.groupby(
                 [
@@ -356,9 +361,7 @@ def pre_process_era5_data(
         Loads the ERA5 climate data grib file and converts it to a DataFrame.
         Also adapt columns names, precipitation units and link grid
         points to administrative boundaries.
-        Finally, computes the average climatology (per location and month)
-        and export the resulting
-        DataFrame to a parquet file.
+        Exports the resulting DataFrame to a parquet file.
 
 
     Parameters
@@ -444,10 +447,9 @@ def pre_process_era5_data(
 ##################################################################
 def ecmwf_bias_correction(ecmwf_file_path, era5_file_path):
     """
-        Compute the bias between the average precipitation prediction
-        (ECMWF) and ground truth (ERA5)
-        per location, month, model and lead time.
-        Correct the bias for every individual prediction.
+        Compute both the ECMWF lead-time bias and the bias (calibration)
+        between ECMWF and ERA5. Add two columns with both bias corrections.
+        Update the input ECMWF file with the new columns
 
     Parameters
     ----------
@@ -488,8 +490,6 @@ def ecmwf_bias_correction(ecmwf_file_path, era5_file_path):
         .reset_index()
     )
 
-    # Compute bias between the average precipitation
-    # per location, month, model and lead time
     ecmwf_corr_df = pd.merge(
         ecmwf_corr_df,
         era5_avg_df,
@@ -497,12 +497,13 @@ def ecmwf_bias_correction(ecmwf_file_path, era5_file_path):
         suffixes=("", "_mean_era5"),
     )
 
-    # Correct the bias by adding (or subtracting)
+    # Correct bias by adding (or subtracting)
     # the average bias to every single prediction.
     # Limits the result to only positive values
     # (negative values are possible
     # when subtracting bias for small predictions)
 
+    # Lead-time bias correction
     ecmwf_corr_df["tp_mm_day_bias_corrected"] = (
         ecmwf_corr_df["tp_mm_day"]
         - ecmwf_corr_df["tp_mm_day_mean_raw"]
@@ -513,6 +514,7 @@ def ecmwf_bias_correction(ecmwf_file_path, era5_file_path):
         "tp_mm_day_bias_corrected",
     ] = 0
 
+    # ECMWF - ERA5 bias correction (calibration)
     ecmwf_corr_df["tp_mm_day_era5_calibrated"] = (
         ecmwf_corr_df["tp_mm_day"]
         - ecmwf_corr_df["tp_mm_day_mean_raw"]
