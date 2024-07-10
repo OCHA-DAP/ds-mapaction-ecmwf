@@ -294,7 +294,8 @@ def plot_leadtime_month_dependency(plot_df, scope_text):
     Parameters
     ----------
         plot_df: DataFrame, Dataset containg bias and MAE between
-        ECMWF and ERA5 scope_text: str, Text used for plot title
+        ECMWF and ERA5
+        scope_text: str, Text used for plot title
 
         Returns
     -------
@@ -355,7 +356,7 @@ def plot_leadtime_month_dependency(plot_df, scope_text):
 
 
 def plot_performance_analysis(
-    ecmwf_df, era5_df, quantile_value_list, month_range
+    ecmwf_df, era5_df, quantile_value_list, month_range, scope_text
 ):
     """
         Plot MAE, Accuracy and F1-score dependency on probability threshold
@@ -369,6 +370,7 @@ def plot_performance_analysis(
         quantile_value_list: list, List with different quantile levels to be
         computed
         month_range: list, Months to be included in the analysis
+        scope_text: str, Text used for plot title
 
         Returns
     -------
@@ -469,8 +471,10 @@ def plot_performance_analysis(
             if col == 0:
                 ax.plot(leadtime_list, mae_list)
                 ax.set_title(
-                    "Mean Absolute Error per leadtime \n (quantile = "
+                    "Mean Absolute Error per leadtime \n quantile = "  # noqa: E501
                     + quantile_label
+                    + " ("
+                    + scope_text
                     + ")"
                 )
                 ax.set_ylabel("MAE")
@@ -484,8 +488,10 @@ def plot_performance_analysis(
                         label="leadtime: " + str(leadtime),
                     )
                 ax.set_title(
-                    "Accuracy score per leadtime and threshold value \n (quantile = "  # noqa: E501
+                    "Accuracy score per leadtime and threshold value \n quantile = "  # noqa: E501
                     + quantile_label
+                    + " ("
+                    + scope_text
                     + ")"
                 )
                 ax.set_ylabel("Accuracy")
@@ -501,8 +507,10 @@ def plot_performance_analysis(
                         label="leadtime: " + str(leadtime),
                     )
                 ax.set_title(
-                    "F1-score per leadtime and threshold value \n (quantile = "  # noqa: E501
+                    "F1-score per leadtime and threshold value \n quantile = "  # noqa: E501
                     + quantile_label
+                    + " ("
+                    + scope_text
                     + ")"
                 )
                 ax.set_ylabel("F1-score")
@@ -512,7 +520,9 @@ def plot_performance_analysis(
     return
 
 
-def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
+def plot_roc_auc_analysis(
+    ecmwf_df, era5_df, quantile_value_list, month_range, scope_text
+):
     """
         Plot ROC (Receiver operating characteristic) and AUC
         (Area Under the Curve) analysis between ECMWF and ERA5
@@ -525,6 +535,7 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
         quantile_value_list: list, List with different quantile levels to be
         computed
         month_range: list, Months to be included in the analysis
+        scope_text: str, Text used for plot title
 
         Returns
     -------
@@ -584,8 +595,10 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
             if col == 0:
 
                 title_text = (
-                    "ROC dependecy to leadtime (quantile = "
+                    "ROC dependecy to leadtime - quantile = "
                     + quantile_label
+                    + "\n ("
+                    + scope_text
                     + ")"
                 )
 
@@ -614,8 +627,10 @@ def plot_roc_auc_analysis(ecmwf_df, era5_df, quantile_value_list, month_range):
             # AUC plot
             else:
                 title_text = (
-                    "Area Under the Curve per leadtime (quantile = "
+                    "Area Under the Curve per leadtime - quantile = "
                     + quantile_label
+                    + "\n ("
+                    + scope_text
                     + ")"
                 )
                 # Dummy data used to create a straight line for the
