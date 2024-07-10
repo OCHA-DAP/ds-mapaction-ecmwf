@@ -406,7 +406,7 @@ def plot_performance_analysis(
     for row in range(n_rows):
 
         # Several threshold values between 0 and 1
-        threshold_list = np.arange(0, 1.1, 0.1).tolist()
+        threshold_list = [-0.01] + np.arange(0, 1.1, 0.1).tolist()
         leadtime_list = df["lead_time_ecmwf"].unique()
         # One list per metric containng values per leadtime and threshold
         mae_list = []
