@@ -44,7 +44,4 @@ help:
 	@echo " make test           - Run unit tests"
 	@echo " make lint           - Run lint tests"
 	@echo " make clean          - Remove .venv"
-	@echo " make docker-build   - Build Docker image"
-	@echo " make docker-run     - Start container"
-	@echo " make docker-clean   - Delete Docker image"
 	@echo ""

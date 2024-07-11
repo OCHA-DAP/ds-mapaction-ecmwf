@@ -20,7 +20,7 @@ make .venv hooks
 
 ### Prepare Data Directory
 
-Set up the data environment variables and paths in your Python script to manage data files and directories. Below is the necessary configuration:
+Set up the data environment variables and paths in your Python script to manage data files and directories. Below is the example configuration:
 
 ```bash
 mkdir -p ~/ma-chd-data/data/input_data
