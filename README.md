@@ -20,7 +20,7 @@
 This repository contains the analysis of the ECMWF seasonal forecasts,
 done in collaboration with MapAction.
 
-## Pipeline Overview Summary
+## Pipeline Summary of Work
 
 This project's pipeline, centered around the **European Centre for Medium-Range Weather Forecasts (ECMWF)** data, involves three main stages: **Data Acquisition**, **Data Processing**, and **Data Analysis**, tailored specifically for climate forecasting.
 
@@ -30,7 +30,7 @@ We automate the fetching of climate datasets like monthly seasonal forecasts thr
 
 ### Data Processing
 
-Utilising Python scripts and Jupyter notebooks, the data processing involves geospatial matching to administrative boundaries, re-gridding, and ensemble handling to optimise memory use. Bias-correction mechanisms are also employed to adjust ECMWF data against ERA5 datasets, ensuring accurate precipitation forecasts.
+Utilising Python scripts the data processing involves geospatial matching, re-gridding, ensemble handling to optimise memory use, and other pre-processing steps. Bias-correction mechanisms are also employed to adjust ECMWF both in respect to different leadtimes and against ERA5 datasets, ensuring accurate precipitation forecasts. A jupyter notebook is provided that can be used to run the pipeline
 
 ### Data Analysis
 
