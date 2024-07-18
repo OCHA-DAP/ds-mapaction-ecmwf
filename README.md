@@ -8,16 +8,33 @@
 |Community|[![Maintenance](https://img.shields.io/badge/Maintained-yes-green)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/graphs/commit-activity) [![Stars](https://img.shields.io/github/stars/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf)  [![Forks](https://img.shields.io/github/forks/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/network/members)  [![Contributors](https://img.shields.io/github/contributors/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/graphs/contributors)  [![Commit activity](https://img.shields.io/github/commit-activity/m/OCHA-DAP/ds-mapaction-ecmwf)](https://github.com/OCHA-DAP/ds-mapaction-ecmwf/commits/main)|
 |Maintainers|[![UN-OCHA](https://img.shields.io/badge/-UN%20OCHA-black?logo=linkedin&colorB=gray)](https://www.linkedin.com/company/united-nations-ocha/) [![MapAction](https://img.shields.io/badge/-MapAction-black?logo=linkedin&colorB=gray)](https://www.linkedin.com/company/mapaction/)|
 
-* [Overview](#overview)
+* [Overview](#pipeline-overview-summary)
 * [Development](#development)
   * [Installing Poetry](#installing-poetry)
   * [Installing dependencies](#installing-dependencies)
   * [Lint and format](#lint-and-format)
+* [Structure](#project-structure)
 
 ## Overview
 
 This repository contains the analysis of the ECMWF seasonal forecasts,
 done in collaboration with MapAction.
+
+## Pipeline Overview Summary
+
+This project's pipeline, centered around the **European Centre for Medium-Range Weather Forecasts (ECMWF)** data, involves three main stages: **Data Acquisition**, **Data Processing**, and **Data Analysis**, tailored specifically for climate forecasting.
+
+### Data Acquisition
+
+We automate the fetching of climate datasets like monthly seasonal forecasts through APIs such as the **Climate Data Store (CDS)**, with flexibility in data storage options, including local and Azure Blob Storage.
+
+### Data Processing
+
+Utilising Python scripts and Jupyter notebooks, the data processing involves geospatial matching to administrative boundaries, re-gridding, and ensemble handling to optimise memory use. Bias-correction mechanisms are also employed to adjust ECMWF data against ERA5 datasets, ensuring accurate precipitation forecasts.
+
+### Data Analysis
+
+Post-processing, the data analysis phase computes probabilistic forecasts and performance metrics. The focus is on quantile probabilities and bias metrics between ECMWF and ERA5 datasets, with in-depth analyses such as forecasting skill maps and error dependency evaluations for different lead times.
 
 ## Development
 
@@ -132,6 +149,8 @@ Below is the directory and file structure of the project, providing a quick over
 * **`tests/`**: Contains test code for the project, ensuring that the software functions as expected.
 
 * **`Makefile`**: This Makefile is designed to facilitate various operations such as dependency management, testing, linting, and data retrieval in a consistent and reproducible manner.
+
+### Directory Tree
 
 ```text
 .
