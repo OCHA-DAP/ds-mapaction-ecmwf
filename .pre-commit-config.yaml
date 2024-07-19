@@ -22,3 +22,9 @@ repos:
       entry: poetry run pymarkdown scan
       language: system
       types: [file, markdown]
+    - id: nbqa-black
+      name: nbqa-black
+      entry: poetry run nbqa black
+      language: system
+      files: \.ipynb$
+      args: ["--nbqa-mutate"]

@@ -1,0 +1,74 @@
+<mxfile host="Electron" modified="2024-06-18T18:50:42.713Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.3 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="MGLovo1o7MJ3FqBSmQXZ" version="24.5.3" type="device">
+  <diagram name="Page-1" id="DIAskAsiWpR5YCiaUAum">
+    <mxGraphModel dx="1036" dy="614" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-1" target="wTujYFw_XffUU_Vmgu1g-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-1" target="wTujYFw_XffUU_Vmgu1g-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-1" value="ECMWF grib file" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="140" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-2" target="wTujYFw_XffUU_Vmgu1g-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-2" value="ERA5 grib file" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="140" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-3" target="wTujYFw_XffUU_Vmgu1g-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.003;entryY=0.096;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-3" target="wTujYFw_XffUU_Vmgu1g-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-3" value="Pre-processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="310" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-4" target="wTujYFw_XffUU_Vmgu1g-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-4" target="wTujYFw_XffUU_Vmgu1g-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="260" />
+              <mxPoint x="410" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-4" value="Pre-processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="310" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-5" target="wTujYFw_XffUU_Vmgu1g-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-5" value="Bias correction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="310" y="155" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1.001;exitY=0.237;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="120" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="wTujYFw_XffUU_Vmgu1g-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="175" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-6" value="&lt;div&gt;Quantile&lt;/div&gt;&lt;div&gt;Probability&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="470" y="70" width="80" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-20" value="Output data prior to bias correction (both at pixel and admin1 level)" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="570" y="60" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="wTujYFw_XffUU_Vmgu1g-21" value="Output data after bias correction (both at pixel and admin1 level)" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="570" y="190" width="160" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
