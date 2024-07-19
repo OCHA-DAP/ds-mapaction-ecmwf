@@ -5,6 +5,81 @@ import pandas as pd
 from sklearn import metrics
 
 
+def aggregate_season(input_df, season_start, season_end, data_type):
+    """
+        Filters only the months contained in the season and
+        aggregates (average) precipitation values for all months. Adpat
+        leadtime value so it corresponds to season leadtime and not
+        individual months.
+
+    Parameters
+    ----------
+        input_df: DataFrame, Dataset with climate data
+        season_start: int, Month when the season starts(value between 1 and 12)
+        season_end: int, Month when the season ends(value between 1 and 12)
+        data_type: str, Type of climate data ('era5' or 'ecmwf')
+    Returns
+    -------
+        df: DataFrame, Resulting dataset with all months within a
+        season aggregated and leadtime adapted to the season
+
+    """
+
+    df = input_df.copy()
+
+    # Filter relevant months and compute season duration (in months)
+    if season_end >= season_start:
+        df = df[
+            (df["valid_time_month"] >= season_start)
+            & (df["valid_time_month"] <= season_end)
+        ]
+        season_duration = season_end - season_start + 1
+    else:
+        df = df[
+            (df["valid_time_month"] >= season_start)
+            | (df["valid_time_month"] <= season_end)
+        ]
+        # Shift one year when the season start and ends in different years.
+        df.loc[df["valid_time_month"] <= season_end, "valid_time_year"] = (
+            df["valid_time_year"] - 1
+        )
+        season_duration = (13 - season_start) + season_end
+
+    # Adapt leadtime for ecmwf data. Replace leadtime relative to each month
+    # to leadtime to the start of the season
+    if data_type == "ecmwf":
+        max_lead_time = 7 - season_duration
+        # Shifts leadtime by the difference between the month
+        # and the start of the season
+        df["lead_time"] = df["lead_time"] - df["valid_time_month"].apply(
+            lambda x: (x - season_start) % 12
+        )
+        # Only keep valid leadtimes where predictions for all
+        # months within the season are available
+        df = df[(df["lead_time"] >= 1) & (df["lead_time"] <= max_lead_time)]
+
+    # List to contain all columns except precipitation (tp) and month
+    col_list = []
+    # List to contain al precipitation (tp) columns
+    tp_list = []
+
+    for col in df.columns:
+        if col[0:9] == "tp_mm_day":
+            tp_list.append(col)
+        else:
+            col_list.append(col)
+
+    col_list.remove("valid_time_month")
+
+    # Aggregate precipitation values (tp) by all other columns
+    # with the exception of valid_time_month
+    df = df.groupby(col_list)[tp_list].mean().reset_index()
+    # Gives a unique value for this column
+    df["valid_time_month"] = "season"
+
+    return df
+
+
 def compute_quantile_probability(
     input_df, quantile_value_list, tp_col_name="tp_mm_day_bias_corrected"
 ):
@@ -12,14 +87,16 @@ def compute_quantile_probability(
         Computes the probability of the ECMWF
         predicted precipitation being under different quantile thresholds
         for every location, month and year.
-        Quantiles thresholds are computd from ERA5
-        climatology for a given location and month.
+        Quantiles thresholds are computed from ECMWF
+        climatology for the period 1993-2016 (following SEAS5 guide)
+        for a given location and month.
         Different thresholds are used following the quantiles values
         (quantiles 50%, 33%, 25% and 20%).
         Probability is based on the share of ECMWF model predicting
         a below quantile value.
-        Individual predictions bias and
-        mean absolute error are also computed.
+        Can also be used for ERA5 quantiles following ERA5 1993-2016
+        climatology. In this case the probability is simply a boolen
+        (1 for drought and 0 for not a drought).
 
 
 
@@ -146,7 +223,7 @@ def prepare_climatology(ecmwf_df, era5_df):
     return ecmwf_plot_df, era5_plot_df
 
 
-def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
+def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text="-"):
     """
         Prepare the data for the climatology plot, climatology meaning
         here the typical year distribution for both ECMWF and ERA5
@@ -212,7 +289,7 @@ def plot_climatology(ecmwf_plot_df, era5_plot_df, scope_text):
     return
 
 
-def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
+def prepare_leadtime_month_dependency(ecmwf_df, era5_df):
     """
         Prepare the data for the ECMWF-ERA5 bias leadtime dependency plot.
 
@@ -221,7 +298,6 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
     ----------
         ecmwf_df: DataFrame, ECMWF processed data
         era5_df: DataFrame, ERA5 processed data
-        month_range: list, Months to be included in the analysis
 
         Returns
     -------
@@ -258,7 +334,6 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
         on=[geom_id, "valid_time_year", "valid_time_month"],
         suffixes=["", "_era5"],
     )
-    plot_df = plot_df[plot_df["valid_time_month"].isin(month_range)]
 
     # List containing the bias and MAE columns to be aggregated
     bias_mae_col_list = []
@@ -285,7 +360,7 @@ def prepare_leadtime_month_dependency(ecmwf_df, era5_df, month_range):
     return plot_df
 
 
-def plot_leadtime_month_dependency(plot_df, scope_text):
+def plot_leadtime_month_dependency(plot_df, scope_text="-"):
     """
         Prepare the data for the climatology plot, climatology meaning
         here the typical year distribution for both ECMWF and ERA5
@@ -356,7 +431,7 @@ def plot_leadtime_month_dependency(plot_df, scope_text):
 
 
 def plot_performance_analysis(
-    ecmwf_df, era5_df, quantile_value_list, month_range, scope_text
+    ecmwf_df, era5_df, quantile_value_list, scope_text="-"
 ):
     """
         Plot MAE, Accuracy and F1-score dependency on probability threshold
@@ -369,7 +444,6 @@ def plot_performance_analysis(
         era5_df: DataFrame, ERA5 data with quantile values
         quantile_value_list: list, List with different quantile levels to be
         computed
-        month_range: list, Months to be included in the analysis
         scope_text: str, Text used for plot title
 
         Returns
@@ -390,7 +464,6 @@ def plot_performance_analysis(
         on=[geom_id, "valid_time_year", "valid_time_month"],
         suffixes=["_ecmwf", "_era5"],
     )
-    df = df[df["valid_time_month"].isin(month_range)]
 
     # If only one quantile value is given, transform it into a
     # single-element list
@@ -478,6 +551,7 @@ def plot_performance_analysis(
                     + ")"
                 )
                 ax.set_ylabel("MAE")
+                ax.set_xlabel("Leadtime (months)")
 
             # Accuracy plot
             elif col == 1:
@@ -521,7 +595,7 @@ def plot_performance_analysis(
 
 
 def plot_roc_auc_analysis(
-    ecmwf_df, era5_df, quantile_value_list, month_range, scope_text
+    ecmwf_df, era5_df, quantile_value_list, scope_text="-"
 ):
     """
         Plot ROC (Receiver operating characteristic) and AUC
@@ -534,7 +608,6 @@ def plot_roc_auc_analysis(
         era5_df: DataFrame, ERA5 data with quantile values
         quantile_value_list: list, List with different quantile levels to be
         computed
-        month_range: list, Months to be included in the analysis
         scope_text: str, Text used for plot title
 
         Returns
@@ -555,7 +628,6 @@ def plot_roc_auc_analysis(
         on=[geom_id, "valid_time_year", "valid_time_month"],
         suffixes=["_ecmwf", "_era5"],
     )
-    df = df[df["valid_time_month"].isin(month_range)]
 
     leadtime_list = df["lead_time_ecmwf"].unique()
 
@@ -654,7 +726,6 @@ def preparece_accuracy_map(
     era5_df,
     admin_df,
     quantile_value_list,
-    month_range,
     leadtime,
     threshold,
 ):
@@ -669,7 +740,6 @@ def preparece_accuracy_map(
         admin_df: GeoDataFrame, Admin boundaries if and admin plot is used
         quantile_value_list: list, List with different quantile levels to be
         computed
-        month_range: list, Months to be included in the analysis
         leadtime: int, ECMWF leadtime to be used
         threshold: float, Probability threshold to compute True / False
         predictions
@@ -704,10 +774,7 @@ def preparece_accuracy_map(
         suffixes=["_ecmwf", "_era5"],
     )
     # Filter for selected months and leadtime
-    df = df[
-        (df["valid_time_month"].isin(month_range))
-        & (df["lead_time_ecmwf"] == leadtime)
-    ]
+    df = df[(df["lead_time_ecmwf"] == leadtime)]
 
     for quantile_value in quantile_value_list:
         # Colums names depending on quantile value
